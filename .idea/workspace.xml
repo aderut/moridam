@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/about/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/admin/blogs/[slug]/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/admin/blogs/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/admin/login/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/admin/menu/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin/login/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/menu/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/blog/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/cart/CartProvider.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/cart/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/checkout/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/AboutSplit.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/BlogPreview.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/BrowseMenuCards.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/Features.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/Footer.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/Gallery.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/Hero.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/MenuGrid.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/MenuSection.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/Navbar.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/Promo.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/ReservationCTA.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/ReservationForm.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/ServiceBookingForm.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/ServicesGrid.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/blog/blogStore.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/cart/CartProvider.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/cart/CartView.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/cart/CheckoutForm.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/menu/menuStore.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/contact/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/lib/supabase-server.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/menu/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/reservation/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/[service]/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/product.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="37ZFAOui64Nh01JwygRJGXoJj29" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;/Users/adesinaruth/Desktop/nextproject/src/main.js&quot;,
+    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/adesinaruth/Desktop/nextproject/node_modules/prettier&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/adesinaruth/Desktop/nextproject/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="npm.Next.js: server-side">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.29346.143" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="" />
+      <created>1767102541964</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1767102541964</updated>
+      <workItem from="1767102542983" duration="64150000" />
+      <workItem from="1767393846192" duration="17366000" />
+      <workItem from="1767567323350" duration="16101000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
