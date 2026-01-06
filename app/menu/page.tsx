@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import type { MenuCategory, MenuItem } from "@/app/components/menu/menuStore";
-import { useCart } from "@/app/components/cart/CartProvider";
+import { useCart } from "@/app/cart/CartProvider";
 
 const BRAND_BG = "#F7EED9"; // navbar / logo beige
 const BRAND_TEXT = "#2B2B2B";

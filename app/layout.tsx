@@ -1,7 +1,7 @@
 import "./globals.css";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
-import { CartProvider } from "@/app/components/cart/CartProvider";
+import { CartProvider } from "@/app/cart/CartProvider";
 
 export default function RootLayout({
                                        children,
