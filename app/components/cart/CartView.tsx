@@ -24,17 +24,24 @@ export default function CartView() {
                 {items.map((it) => (
                     <div key={it.id} className="border rounded-xl p-4 bg-white flex gap-4">
                         <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-slate-100">
-                            <Image src={it.product.image} alt={it.product.name} fill className="object-cover" />
+                            {it.image ? (
+                                <Image src={it.image} alt={it.title} fill className="object-cover" />
+                            ) : (
+                                <div className="absolute inset-0 grid place-items-center text-xs text-slate-400">
+                                    No image
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex-1">
                             <div className="flex justify-between gap-3">
                                 <div>
-                                    <div className="font-extrabold">{it.product.name}</div>
-                                    <div className="text-xs text-slate-500">{it.product.category}</div>
+                                    <div className="font-extrabold">{it.title}</div>
+                                    {/* If you want category here, add `category?: string` to CartItem */}
                                 </div>
+
                                 <div className="font-extrabold">
-                                    ₦{(it.product.price * it.qty).toLocaleString()}
+                                    ₦{(it.price * it.qty).toLocaleString()}
                                 </div>
                             </div>
 
@@ -45,11 +52,14 @@ export default function CartView() {
                                 >
                                     -
                                 </button>
+
                                 <input
                                     className="w-14 h-9 border rounded-lg text-center"
                                     value={it.qty}
-                                    onChange={(e) => setQty(it.id, Number(e.target.value))}
+                                    onChange={(e) => setQty(it.id, Number(e.target.value) || 1)}
+                                    inputMode="numeric"
                                 />
+
                                 <button
                                     className="w-9 h-9 rounded-lg border"
                                     onClick={() => setQty(it.id, it.qty + 1)}

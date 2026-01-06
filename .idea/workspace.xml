@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/components/MenuGrid.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/MenuGrid.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +83,7 @@
       <updated>1767102541964</updated>
       <workItem from="1767102542983" duration="64150000" />
       <workItem from="1767393846192" duration="17366000" />
-      <workItem from="1767567323350" duration="19966000" />
+      <workItem from="1767567323350" duration="21168000" />
     </task>
     <servers />
   </component>
