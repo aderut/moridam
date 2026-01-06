@@ -4,48 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/about/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/admin/blogs/[slug]/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/admin/blogs/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/admin/login/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/admin/menu/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/admin/login/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/menu/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/blog/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/cart/CartProvider.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/cart/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/checkout/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/AboutSplit.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/BlogPreview.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/BrowseMenuCards.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/Features.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/Footer.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/Gallery.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/Hero.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/MenuGrid.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/MenuSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/Navbar.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/Promo.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/ReservationCTA.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/ReservationForm.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/ServiceBookingForm.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/ServicesGrid.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/blog/blogStore.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/cart/CartProvider.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/cart/CartView.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/cart/CheckoutForm.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/components/menu/menuStore.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/contact/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/supabase-server.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/menu/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/reservation/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/[service]/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/product.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
-    </list>
+    <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -122,7 +81,7 @@
       <updated>1767102541964</updated>
       <workItem from="1767102542983" duration="64150000" />
       <workItem from="1767393846192" duration="17366000" />
-      <workItem from="1767567323350" duration="16101000" />
+      <workItem from="1767567323350" duration="16886000" />
     </task>
     <servers />
   </component>
