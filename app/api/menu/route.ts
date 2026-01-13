@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 
 export async function GET() {
-    // ✅ Public: anyone can read menu
     const { data, error } = await supabaseAdmin
         .from("menu_items")
         .select("*")
@@ -14,12 +13,13 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-    // 🔒 Admin only: create
     const authed = req.cookies.get("admin_auth")?.value === "1";
     if (!authed) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json().catch(() => null);
-    if (!body?.title) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    if (!body?.title || !body?.category) {
+        return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    }
 
     const { data, error } = await supabaseAdmin
         .from("menu_items")
