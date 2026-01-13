@@ -1,341 +1,364 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
-import { useCart } from "@/app/components/cart/CartProvider";
+import { useEffect, useMemo, useState } from "react";
+import { useCart } from "@/app/cart/CartProvider";
 
 const BEIGE = "#FBF4DE";
+const TEXT = "#2B2B2B";
 
-type DeliveryMethod = "delivery" | "pickup";
-type Zone = "ph_city" | "ph_outskirts" | "outside_ph";
-type PaymentMethod = "fake_online" | "cod";
+// Your pickup point (Rumuevorlu)
+const PICKUP_LABEL = "Pickup (Rumuevorlu)";
+const PICKUP_COORDS: [number, number] = [6.96449, 4.84044]; // [lng, lat]
 
-const ZONE_FEES: Record<Zone, number> = {
-    ph_city: 1500,
-    ph_outskirts: 2500,
-    outside_ph: 4000,
+type Method = "delivery" | "pickup";
+
+type PlaceResult = {
+    label: string;
+    lat: number;
+    lng: number;
 };
 
 export default function CheckoutPage() {
-    const { items, total, clear } = useCart();
+    const { items, total: subtotal, clear } = useCart();
 
-    const [method, setMethod] = useState<DeliveryMethod>("delivery");
-    const [zone, setZone] = useState<Zone>("ph_city");
-    const [payment, setPayment] = useState<PaymentMethod>("fake_online");
+    const [method, setMethod] = useState<Method>("delivery");
 
-    const [details, setDetails] = useState({
-        fullName: "",
-        phone: "",
-        email: "",
-        address: "",
-        landmark: "",
-        deliveryDate: "",
-        notes: "",
-    });
+    const [fullName, setFullName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [note, setNote] = useState("");
 
-    const deliveryFee = useMemo(() => {
-        if (method === "pickup") return 0;
-        return ZONE_FEES[zone] ?? 0;
-    }, [method, zone]);
+    // ✅ Search + dropdown results
+    const [query, setQuery] = useState("");
+    const [results, setResults] = useState<PlaceResult[]>([]);
+    const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null);
 
-    const grandTotal = useMemo(() => total + deliveryFee, [total, deliveryFee]);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
 
-    function update<K extends keyof typeof details>(key: K, value: (typeof details)[K]) {
-        setDetails((p) => ({ ...p, [key]: value }));
-    }
+    // ✅ Delivery quote
+    const [quoteLoading, setQuoteLoading] = useState(false);
+    const [deliveryFee, setDeliveryFee] = useState(0);
 
-    function placeOrderFake(status: "paid" | "unpaid") {
-        // basic validation
-        if (!details.fullName.trim() || !details.phone.trim()) {
-            alert("Please enter your full name and phone number.");
+    const [saving, setSaving] = useState(false);
+    const [done, setDone] = useState(false);
+    const [orderId, setOrderId] = useState<string | null>(null);
+
+    const grandTotal = useMemo(() => {
+        return method === "delivery" ? subtotal + deliveryFee : subtotal;
+    }, [subtotal, deliveryFee, method]);
+
+    // ✅ Search places (debounced)
+    useEffect(() => {
+        if (method !== "delivery") {
+            setQuery("");
+            setResults([]);
+            setSelectedPlace(null);
+            setSearchError(null);
+            setSearchLoading(false);
+            setDeliveryFee(0);
             return;
         }
-        if (method === "delivery" && !details.address.trim()) {
-            alert("Please enter your delivery address.");
+
+        const q = query.trim();
+        if (q.length < 3) {
+            setResults([]);
+            setSearchError(null);
             return;
         }
 
-        const payload = {
-            id: `order_${Date.now()}`,
-            createdAt: new Date().toISOString(),
-            paymentStatus: status,
-            paymentMethod: payment,
-            method,
-            zone: method === "delivery" ? zone : null,
-            deliveryFee,
-            total,
-            grandTotal,
-            customer: details,
-            items,
+        const t = setTimeout(async () => {
+            setSearchLoading(true);
+            setSearchError(null);
+            try {
+                const res = await fetch("/api/places/search", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: q }),
+                });
+
+                const data = await res.json().catch(() => []);
+                if (!res.ok) throw new Error(data?.error || "Search failed");
+
+                setResults(Array.isArray(data) ? data : []);
+            } catch (e: any) {
+                setResults([]);
+                setSearchError(e?.message || "Could not search address");
+            } finally {
+                setSearchLoading(false);
+            }
+        }, 500);
+
+        return () => clearTimeout(t);
+    }, [query, method]);
+
+    // ✅ When user picks a place -> calculate delivery fee
+    useEffect(() => {
+        if (method !== "delivery") return;
+
+        if (!selectedPlace) {
+            setDeliveryFee(0);
+            return;
+        }
+
+        const run = async () => {
+            setQuoteLoading(true);
+            try {
+                const to: [number, number] = [selectedPlace.lng, selectedPlace.lat];
+
+                const res = await fetch("/api/delivery/quote", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ to }), // [lng, lat]
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data?.error || "Quote failed");
+
+                setDeliveryFee(Number(data.fee) || 0);
+            } catch {
+                setDeliveryFee(0);
+            } finally {
+                setQuoteLoading(false);
+            }
         };
 
-        localStorage.setItem("last_order", JSON.stringify(payload));
+        run();
+    }, [selectedPlace, method]);
 
-        clear();
-        window.location.href = "/checkout/success";
+    async function placeOrder(e: React.FormEvent) {
+        e.preventDefault();
+        if (items.length === 0) return;
+
+        if (method === "delivery" && !selectedPlace) {
+            alert("Please select the correct address from the list.");
+            return;
+        }
+
+        setSaving(true);
+        try {
+            const payload = {
+                fullName,
+                phone,
+                note,
+                items,
+                subtotal,
+                method,
+                deliveryFee: method === "delivery" ? deliveryFee : 0,
+                total: grandTotal,
+                address:
+                    method === "delivery"
+                        ? selectedPlace?.label
+                        : PICKUP_LABEL,
+                coords:
+                    method === "delivery"
+                        ? [selectedPlace!.lng, selectedPlace!.lat]
+                        : PICKUP_COORDS,
+            };
+
+            // ✅ You can still save to Supabase here (your /api/orders)
+            const res = await fetch("/api/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data?.error || "Order failed");
+
+            setOrderId(data?.order?.id || null);
+            clear();
+            setDone(true);
+        } catch (err: any) {
+            alert(err?.message || "Order failed");
+        } finally {
+            setSaving(false);
+        }
     }
 
-    if (items.length === 0) {
+    if (done) {
+        const message = encodeURIComponent(
+            `Hi Moridam Catering, I placed an order.\nOrder ID: ${orderId ?? "N/A"}\nMethod: ${method}\nTotal: ₦${grandTotal.toLocaleString()}`
+        );
+
         return (
-            <div className="bg-[var(--bg)] min-h-screen pt-20 pb-12">
-                <div className="max-w-[1120px] mx-auto px-5">
-                    <div className="bg-white border border-[var(--line)] rounded-2xl p-10 text-center">
-                        <div className="text-lg font-extrabold text-[var(--ink)]">Cart is empty</div>
-                        <p className="mt-2 text-[var(--color-muted)]">Add items from the menu first.</p>
-                        <Link
-                            href="/menu"
+            <div className="bg-[var(--bg)] min-h-screen pt-24 pb-12">
+                <div className="max-w-[800px] mx-auto px-5">
+                    <div className="bg-white border border-[var(--line)] rounded-2xl p-8">
+                        <h1 className="text-2xl font-extrabold text-[var(--ink)]">
+                            Order successful ✅
+                        </h1>
+                        <p className="mt-2 text-[var(--color-muted)]">
+                            Your order has been received.
+                        </p>
+
+                        <a
                             className="mt-5 inline-flex h-11 px-6 rounded-full font-semibold items-center justify-center"
-                            style={{ backgroundColor: BEIGE, color: "#000" }}
+                            style={{ backgroundColor: BEIGE, color: TEXT }}
+                            href={`https://wa.me/2348161637306?text=${message}`}
+                            target="_blank"
+                            rel="noreferrer"
                         >
-                            Go to Menu
-                        </Link>
+                            Send confirmation on WhatsApp
+                        </a>
                     </div>
                 </div>
             </div>
         );
     }
 
-    const needsDeliveryFields = method === "delivery";
-
     return (
-        <div className="bg-[var(--bg)] min-h-screen pt-20 pb-12">
-            <div className="max-w-[1120px] mx-auto px-5">
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                    <h1 className="text-4xl font-extrabold text-[var(--ink)]">Checkout</h1>
-                    <Link href="/cart" className="text-sm font-semibold hover:underline">
-                        ← Back to Cart
-                    </Link>
-                </div>
+        <div className="bg-[var(--bg)] min-h-screen pt-24 pb-12">
+            <div className="max-w-[900px] mx-auto px-5">
+                <h1 className="text-4xl font-extrabold text-[var(--ink)]">Checkout</h1>
 
-                <div className="mt-8 grid lg:grid-cols-[1fr_360px] gap-6">
-                    {/* LEFT */}
-                    <div className="bg-white border border-[var(--line)] rounded-2xl p-6">
-                        <div className="font-extrabold text-[var(--ink)] text-lg">Delivery Details</div>
-                        <p className="mt-1 text-sm text-[var(--color-muted)]">
-                            Choose delivery or pickup, then fill your details.
-                        </p>
-
-                        {/* Delivery / Pickup */}
-                        <div className="mt-5 flex gap-3 flex-wrap">
-                            <button
-                                type="button"
-                                onClick={() => setMethod("delivery")}
-                                className={[
-                                    "h-10 px-5 rounded-full border text-sm font-semibold transition",
-                                    method === "delivery" ? "border-transparent" : "border-[var(--line)]",
-                                ].join(" ")}
-                                style={method === "delivery" ? { backgroundColor: BEIGE, color: "#000" } : {}}
-                            >
-                                Delivery
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => setMethod("pickup")}
-                                className={[
-                                    "h-10 px-5 rounded-full border text-sm font-semibold transition",
-                                    method === "pickup" ? "border-transparent" : "border-[var(--line)]",
-                                ].join(" ")}
-                                style={method === "pickup" ? { backgroundColor: BEIGE, color: "#000" } : {}}
-                            >
-                                Pickup
-                            </button>
-                        </div>
-
-                        {/* Zone */}
-                        {needsDeliveryFields && (
-                            <div className="mt-5">
-                                <label className="block text-sm font-semibold text-[var(--ink)] mb-2">
-                                    Delivery area (used to calculate fee)
-                                </label>
-                                <select
-                                    value={zone}
-                                    onChange={(e) => setZone(e.target.value as Zone)}
-                                    className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none"
+                {items.length === 0 ? (
+                    <p className="mt-6 text-[var(--color-muted)]">Your cart is empty.</p>
+                ) : (
+                    <form onSubmit={placeOrder} className="mt-6 grid lg:grid-cols-2 gap-6">
+                        {/* Left */}
+                        <div className="bg-white border border-[var(--line)] rounded-2xl p-6 space-y-4">
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setMethod("delivery")}
+                                    className="h-10 px-4 rounded-full border text-sm font-semibold"
+                                    style={
+                                        method === "delivery"
+                                            ? { backgroundColor: BEIGE, color: TEXT, borderColor: "transparent" }
+                                            : {}
+                                    }
                                 >
-                                    <option value="ph_city">Port Harcourt (City)</option>
-                                    <option value="ph_outskirts">PH Outskirts</option>
-                                    <option value="outside_ph">Outside Port Harcourt</option>
-                                </select>
+                                    Delivery
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setMethod("pickup")}
+                                    className="h-10 px-4 rounded-full border text-sm font-semibold"
+                                    style={
+                                        method === "pickup"
+                                            ? { backgroundColor: BEIGE, color: TEXT, borderColor: "transparent" }
+                                            : {}
+                                    }
+                                >
+                                    Pickup (Rumuevorlu)
+                                </button>
                             </div>
-                        )}
 
-                        {/* Fields */}
-                        <div className="mt-6 grid md:grid-cols-2 gap-4">
-                            <Field label="Full Name">
-                                <input
-                                    value={details.fullName}
-                                    onChange={(e) => update("fullName", e.target.value)}
-                                    className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none"
-                                    placeholder="Your name"
-                                    required
-                                />
-                            </Field>
+                            <input
+                                className="w-full h-11 rounded-xl border border-[var(--line)] px-3"
+                                placeholder="Full name"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                required
+                            />
 
-                            <Field label="Phone Number">
-                                <input
-                                    value={details.phone}
-                                    onChange={(e) => update("phone", e.target.value)}
-                                    className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none"
-                                    placeholder="+234..."
-                                    required
-                                />
-                            </Field>
+                            <input
+                                className="w-full h-11 rounded-xl border border-[var(--line)] px-3"
+                                placeholder="Phone"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                required
+                            />
 
-                            <Field label="Email (optional)">
-                                <input
-                                    value={details.email}
-                                    onChange={(e) => update("email", e.target.value)}
-                                    className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none"
-                                    placeholder="you@email.com"
-                                    type="email"
-                                />
-                            </Field>
+                            {/* Delivery search + dropdown */}
+                            {method === "delivery" ? (
+                                <div className="relative">
+                                    <input
+                                        className="w-full h-11 rounded-xl border border-[var(--line)] px-3"
+                                        placeholder="Search restaurant, church, or street (Port Harcourt)"
+                                        value={query}
+                                        onChange={(e) => {
+                                            setQuery(e.target.value);
+                                            setSelectedPlace(null);
+                                        }}
+                                        required
+                                    />
 
-                            <Field label={needsDeliveryFields ? "Delivery Date" : "Pickup Date"}>
-                                <input
-                                    value={details.deliveryDate}
-                                    onChange={(e) => update("deliveryDate", e.target.value)}
-                                    className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none"
-                                    type="date"
-                                />
-                            </Field>
+                                    {/* Status */}
+                                    <div className="mt-2 text-sm text-slate-500">
+                                        {searchLoading ? (
+                                            <span>Searching…</span>
+                                        ) : searchError ? (
+                                            <span className="text-red-600">{searchError}</span>
+                                        ) : selectedPlace ? (
+                                            <span>
+                        Selected: <b>{selectedPlace.label}</b>
+                      </span>
+                                        ) : (
+                                            <span>Type and choose the correct place from the list.</span>
+                                        )}
+                                    </div>
 
-                            {needsDeliveryFields && (
-                                <>
-                                    <Field label="Delivery Address">
-                                        <input
-                                            value={details.address}
-                                            onChange={(e) => update("address", e.target.value)}
-                                            className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none"
-                                            placeholder="Street, area..."
-                                            required
-                                        />
-                                    </Field>
-
-                                    <Field label="Nearest Landmark (optional)">
-                                        <input
-                                            value={details.landmark}
-                                            onChange={(e) => update("landmark", e.target.value)}
-                                            className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none"
-                                            placeholder="Close to..."
-                                        />
-                                    </Field>
-                                </>
+                                    {/* Dropdown */}
+                                    {results.length > 0 && (
+                                        <div className="absolute z-20 mt-2 w-full bg-white border border-[var(--line)] rounded-xl shadow overflow-hidden">
+                                            {results.map((r, i) => (
+                                                <button
+                                                    key={i}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSelectedPlace(r);
+                                                        setQuery(r.label);
+                                                        setResults([]);
+                                                    }}
+                                                    className="block w-full text-left px-4 py-2 text-sm hover:bg-slate-50"
+                                                >
+                                                    {r.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="rounded-xl border p-3 text-sm text-slate-700">
+                                    Pickup location: <b>{PICKUP_LABEL}</b>
+                                </div>
                             )}
+
+                            <textarea
+                                className="w-full min-h-[120px] rounded-xl border border-[var(--line)] p-3"
+                                placeholder="Order note (optional)"
+                                value={note}
+                                onChange={(e) => setNote(e.target.value)}
+                            />
                         </div>
 
-                        <div className="mt-4">
-                            <Field label="Extra Notes (optional)">
-                <textarea
-                    value={details.notes}
-                    onChange={(e) => update("notes", e.target.value)}
-                    className="w-full min-h-[110px] rounded-xl border border-[var(--line)] p-3 outline-none"
-                    placeholder="Preferences, time, packaging, etc."
-                />
-                            </Field>
-                        </div>
-
-                        {/* PAYMENT */}
-                        <div className="mt-8 border-t border-[var(--line)] pt-6">
-                            <div className="font-extrabold text-[var(--ink)] text-lg">Payment</div>
-
-                            <div className="mt-4 grid sm:grid-cols-2 gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setPayment("fake_online")}
-                                    className="rounded-2xl border border-[var(--line)] p-4 text-left"
-                                    style={payment === "fake_online" ? { backgroundColor: BEIGE } : {}}
-                                >
-                                    <div className="font-bold text-[var(--ink)]">Pay Online (Fake)</div>
-                                    <div className="text-sm text-[var(--color-muted)] mt-1">
-                                        For testing only
-                                    </div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setPayment("cod")}
-                                    className="rounded-2xl border border-[var(--line)] p-4 text-left"
-                                    style={payment === "cod" ? { backgroundColor: BEIGE } : {}}
-                                >
-                                    <div className="font-bold text-[var(--ink)]">
-                                        {method === "pickup" ? "Pay on Pickup" : "Pay on Delivery"}
-                                    </div>
-                                    <div className="text-sm text-[var(--color-muted)] mt-1">
-                                        We confirm your order first
-                                    </div>
-                                </button>
+                        {/* Right */}
+                        <div className="bg-white border border-[var(--line)] rounded-2xl p-6 h-fit">
+                            <div className="flex justify-between font-bold">
+                                <span>Subtotal</span>
+                                <span>₦{subtotal.toLocaleString()}</span>
                             </div>
 
-                            {/* ✅ Fake success buttons */}
+                            <div className="flex justify-between font-bold mt-3">
+                                <span>Delivery Fee</span>
+                                <span>
+                  {method === "pickup"
+                      ? "₦0"
+                      : quoteLoading
+                          ? "Calculating…"
+                          : `₦${deliveryFee.toLocaleString()}`}
+                </span>
+                            </div>
+
+                            <div className="flex justify-between font-extrabold mt-4 text-lg">
+                                <span>Total</span>
+                                <span>₦{grandTotal.toLocaleString()}</span>
+                            </div>
+
                             <button
-                                type="button"
-                                onClick={() => placeOrderFake(payment === "fake_online" ? "paid" : "unpaid")}
-                                className="mt-5 h-11 px-6 rounded-full font-semibold inline-flex items-center justify-center"
-                                style={{ backgroundColor: BEIGE, color: "#000" }}
+                                type="submit"
+                                disabled={saving}
+                                className="mt-5 w-full h-11 rounded-full font-semibold disabled:opacity-60"
+                                style={{ backgroundColor: BEIGE, color: TEXT }}
                             >
-                                {payment === "fake_online" ? "Pay Now (Fake)" : "Place Order"}
+                                {saving ? "Placing order…" : "Place Order"}
                             </button>
                         </div>
-                    </div>
-
-                    {/* RIGHT */}
-                    <div className="bg-white border border-[var(--line)] rounded-2xl p-6 h-fit">
-                        <div className="font-extrabold text-[var(--ink)] text-lg">Order Summary</div>
-
-                        <div className="mt-4 space-y-3">
-                            {items.map((i) => (
-                                <div key={i.id} className="flex items-start justify-between gap-3">
-                                    <div className="text-sm">
-                                        <div className="font-semibold text-[var(--ink)]">
-                                            {i.title} <span className="text-[var(--color-muted)]">× {i.qty}</span>
-                                        </div>
-                                        <div className="text-[12px] text-[var(--color-muted)]">
-                                            ₦{i.price.toLocaleString()} each
-                                        </div>
-                                    </div>
-                                    <div className="text-sm font-bold text-[var(--ink)]">
-                                        ₦{(i.price * i.qty).toLocaleString()}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="mt-6 border-t border-[var(--line)] pt-4 space-y-2 text-sm">
-                            <div className="flex items-center justify-between">
-                                <div className="text-[var(--color-muted)]">Items total</div>
-                                <div className="font-semibold text-[var(--ink)]">₦{total.toLocaleString()}</div>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <div className="text-[var(--color-muted)]">Delivery fee</div>
-                                <div className="font-semibold text-[var(--ink)]">₦{deliveryFee.toLocaleString()}</div>
-                            </div>
-
-                            <div className="flex items-center justify-between pt-2 border-t border-[var(--line)]">
-                                <div className="font-extrabold text-[var(--ink)]">Grand total</div>
-                                <div className="font-extrabold text-[var(--ink)]">
-                                    ₦{grandTotal.toLocaleString()}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-4 text-xs text-[var(--color-muted)]">
-                            Tip: choose <b>Pickup</b> to remove delivery fee.
-                        </div>
-                    </div>
-                </div>
+                    </form>
+                )}
             </div>
         </div>
-    );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-    return (
-        <label className="block">
-            <div className="text-sm font-semibold text-[var(--ink)] mb-2">{label}</div>
-            {children}
-        </label>
     );
 }

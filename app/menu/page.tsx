@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { MenuCategory, MenuItem } from "@/app/components/menu/menuStore";
 import { useCart } from "@/app/cart/CartProvider";
 
-const BRAND_BG = "#F7EED9"; // navbar / logo beige
+const BRAND_BG = "#F7EED9";
 const BRAND_TEXT = "#2B2B2B";
 
 const tabs: { label: string; value: MenuCategory }[] = [
@@ -16,7 +16,6 @@ const tabs: { label: string; value: MenuCategory }[] = [
     { label: "Cakes", value: "cakes" },
 ];
 
-// Supabase row shape
 type DbMenuItem = {
     id: string;
     title: string;
@@ -32,40 +31,75 @@ function toMenuItem(d: DbMenuItem): MenuItem {
         id: d.id,
         title: d.title,
         description: d.description ?? "",
-        price: d.price ?? 0,
+        price: Number(d.price ?? 0),
         category: d.category as any,
         image: d.image ?? undefined,
     };
+}
+
+// ✅ Safe parse: avoids "Unexpected end of JSON input"
+async function safeJson(res: Response) {
+    const text = await res.text();
+    if (!text) return null;
+    try {
+        return JSON.parse(text);
+    } catch {
+        return { error: text };
+    }
+}
+
+// ✅ Avoid console errors breaking build (no-console)
+function devLog(...args: any[]) {
+    if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.log(...args);
+    }
 }
 
 export default function MenuPage() {
     const [items, setItems] = useState<MenuItem[]>([]);
     const [active, setActive] = useState<MenuCategory>("all");
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
     const { add } = useCart();
 
     useEffect(() => {
+        let alive = true;
+
         (async () => {
+            setLoading(true);
+            setLoadError(null);
+
             try {
-                setLoading(true);
                 const res = await fetch("/api/menu", { cache: "no-store" });
-                const data = await res.json();
+                const data = await safeJson(res);
 
                 if (!res.ok) {
-                    console.error("Menu API error:", data?.error || data);
+                    devLog("Menu API error:", data);
+                    if (!alive) return;
                     setItems([]);
+                    setLoadError((data as any)?.error || "Failed to load menu");
                     return;
                 }
 
-                setItems((data as DbMenuItem[]).map(toMenuItem));
-            } catch (e) {
-                console.error("Failed to fetch menu:", e);
+                const list = Array.isArray(data) ? (data as DbMenuItem[]) : [];
+                if (!alive) return;
+                setItems(list.map(toMenuItem));
+            } catch (e: any) {
+                devLog("Failed to fetch menu:", e);
+                if (!alive) return;
                 setItems([]);
+                setLoadError(e?.message || "Failed to load menu");
             } finally {
+                if (!alive) return;
                 setLoading(false);
             }
         })();
+
+        return () => {
+            alive = false;
+        };
     }, []);
 
     const filtered = useMemo(() => {
@@ -106,10 +140,14 @@ export default function MenuPage() {
                     })}
                 </div>
 
-                {/* Loading */}
+                {/* Loading / Error */}
                 {loading ? (
                     <div className="mt-12 text-center text-[var(--color-muted)]">
                         Loading menu...
+                    </div>
+                ) : loadError ? (
+                    <div className="mt-12 text-center text-red-600 font-semibold">
+                        {loadError}
                     </div>
                 ) : filtered.length > 0 ? (
                     <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -121,12 +159,7 @@ export default function MenuPage() {
                                 {/* Image */}
                                 <div className="relative h-40 bg-slate-100">
                                     {item.image ? (
-                                        <Image
-                                            src={item.image}
-                                            alt={item.title}
-                                            fill
-                                            className="object-cover"
-                                        />
+                                        <Image src={item.image} alt={item.title} fill className="object-cover" />
                                     ) : (
                                         <div className="absolute inset-0 grid place-items-center text-slate-400 text-sm pointer-events-none">
                                             No image
@@ -153,7 +186,6 @@ export default function MenuPage() {
                                         {item.description}
                                     </p>
 
-                                    {/* Add to Cart */}
                                     <button
                                         type="button"
                                         onClick={() =>

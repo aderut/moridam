@@ -1,121 +1,107 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import type { BlogPost } from "@/app/components/blog/blogStore";
-import { loadPosts } from "@/app/components/blog/blogStore";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-const BEIGE = "#FBF5E6";
+type Announcement = {
+    id: string;
+    text: string;
+    enabled?: boolean;
+    sort?: number;
+};
 
-export default function BlogPreview() {
-    const [posts, setPosts] = useState<BlogPost[]>([]);
+const FOOTER_BG = "#2B2B2B";
+const BEIGE = "#FBF4DE";
 
+async function safeJson(res: Response) {
+    const t = await res.text();
+    if (!t) return null;
+    try {
+        return JSON.parse(t);
+    } catch {
+        return null;
+    }
+}
+
+export default function AnnouncementBar() {
+    const [items, setItems] = useState<Announcement[]>([]);
+    const [idx, setIdx] = useState(0);
+
+    const timerRef = useRef<any>(null);
+
+    const active = useMemo(() => {
+        if (!items.length) return null;
+        return items[Math.max(0, Math.min(idx, items.length - 1))];
+    }, [items, idx]);
+
+    // load announcements
     useEffect(() => {
-        setPosts(loadPosts());
+        (async () => {
+            try {
+                const res = await fetch("/api/announcements", { cache: "no-store" });
+                const data = await safeJson(res);
+                const list = Array.isArray(data) ? data : [];
+                setItems(list.filter((x) => x?.text));
+                setIdx(0);
+            } catch {
+                setItems([]);
+            }
+        })();
     }, []);
 
-    // hide section completely if no blogs
-    if (posts.length === 0) return null;
+    // auto slide
+    useEffect(() => {
+        if (!items.length) return;
 
-    const featured = posts[0];
-    const others = posts.slice(1, 5);
+        clearInterval(timerRef.current);
+        timerRef.current = setInterval(() => {
+            setIdx((prev) => (prev + 1) % items.length);
+        }, 4000);
+
+        return () => clearInterval(timerRef.current);
+    }, [items]);
+
+    function prev() {
+        if (!items.length) return;
+        setIdx((p) => (p - 1 + items.length) % items.length);
+    }
+
+    function next() {
+        if (!items.length) return;
+        setIdx((p) => (p + 1) % items.length);
+    }
+
+    if (!active) return null;
 
     return (
-        <section className="py-14">
-            <div className="max-w-[1120px] mx-auto px-5">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-3xl font-extrabold text-[var(--ink)]">
-                        Our Blog & Articles
-                    </h3>
+        <div
+            className="w-full"
+            style={{ backgroundColor: FOOTER_BG, color: BEIGE }}
+        >
+            <div className="max-w-[1120px] mx-auto px-4 h-10 flex items-center justify-between gap-3">
+                <button
+                    type="button"
+                    onClick={prev}
+                    className="h-8 w-8 rounded-full grid place-items-center"
+                    style={{ backgroundColor: "rgba(255,255,255,0.10)" }}
+                    aria-label="Previous announcement"
+                >
+                    ‹
+                </button>
 
-                    {/* ✅ Beige button */}
-                    <Link
-                        href="/blog"
-                        className="h-10 px-4 rounded-full font-semibold text-sm inline-flex items-center justify-center"
-                        style={{ backgroundColor: BEIGE, color: "#000" }}
-                    >
-                        Read All Articles
-                    </Link>
+                <div className="flex-1 text-center text-sm font-semibold truncate px-2">
+                    {active.text}
                 </div>
 
-                <div className="mt-10 grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
-                    {/* Featured post */}
-                    <Link
-                        href={`/blog/${featured.slug}`}
-                        className="bg-white border border-[var(--line)] rounded-2xl overflow-hidden block hover:shadow-sm transition"
-                    >
-                        <div className="relative h-72 bg-slate-100">
-                            {featured.coverImage && (
-                                <Image
-                                    src={featured.coverImage}
-                                    alt={featured.title}
-                                    fill
-                                    className="object-cover"
-                                />
-                            )}
-                        </div>
-
-                        <div className="p-6">
-                            <div className="text-xs text-slate-500">{featured.date}</div>
-
-                            <div className="mt-2 font-extrabold text-[var(--ink)]">
-                                {featured.title}
-                            </div>
-
-                            <p className="mt-2 text-sm text-[var(--color-muted)] leading-7">
-                                {featured.excerpt}
-                            </p>
-
-                            {/* ✅ Beige link */}
-                            <span
-                                className="mt-4 inline-block text-sm font-semibold"
-                                style={{ color: BEIGE }}
-                            >
-                Read more →
-              </span>
-                        </div>
-                    </Link>
-
-                    {/* Other posts */}
-                    <div className="grid sm:grid-cols-2 gap-5">
-                        {others.map((p) => (
-                            <Link
-                                key={p.id}
-                                href={`/blog/${p.slug}`}
-                                className="bg-white border border-[var(--line)] rounded-2xl overflow-hidden block hover:shadow-sm transition"
-                            >
-                                <div className="relative h-32 bg-slate-100">
-                                    {p.coverImage && (
-                                        <Image
-                                            src={p.coverImage}
-                                            alt={p.title}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    )}
-                                </div>
-
-                                <div className="p-4">
-                                    <div className="text-xs text-slate-500">{p.date}</div>
-
-                                    <div className="mt-1 text-sm font-bold text-[var(--ink)]">
-                                        {p.title}
-                                    </div>
-
-                                    {/* ✅ Beige link */}
-                                    <span
-                                        className="mt-3 inline-block text-sm font-semibold"
-                                        style={{ color: BEIGE }}
-                                    >
-                    Read more →
-                  </span>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
+                <button
+                    type="button"
+                    onClick={next}
+                    className="h-8 w-8 rounded-full grid place-items-center"
+                    style={{ backgroundColor: "rgba(255,255,255,0.10)" }}
+                    aria-label="Next announcement"
+                >
+                    ›
+                </button>
             </div>
-        </section>
+        </div>
     );
 }

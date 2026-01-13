@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const BEIGE = "#F7EED9";
 const TEXT = "#2B2B2B";
@@ -10,7 +10,9 @@ export default function AdminLoginPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -21,10 +23,13 @@ export default function AdminLoginPage() {
             const res = await fetch("/api/admin/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: "include", // ✅ IMPORTANT: allow Set-Cookie to persist
                 body: JSON.stringify({ password }),
             });
 
-            const data = await res.json();
+            // ✅ safe parse (prevents "Unexpected end of JSON input")
+            const text = await res.text();
+            const data = text ? JSON.parse(text) : {};
 
             if (!res.ok) {
                 setError(data?.error || "Invalid password");
@@ -32,10 +37,11 @@ export default function AdminLoginPage() {
                 return;
             }
 
-            // ✅ success → go to admin menu
-            router.push("/admin/menu");
-        } catch (err) {
-            setError("Something went wrong");
+            // ✅ after cookie is set, do a HARD navigation so middleware sees it immediately
+            const next = searchParams.get("next") || "/admin/menu";
+            window.location.href = next;
+        } catch (err: any) {
+            setError(err?.message || "Something went wrong");
         } finally {
             setLoading(false);
         }

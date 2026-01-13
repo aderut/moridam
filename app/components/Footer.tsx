@@ -76,20 +76,24 @@ export default function Footer() {
                         </div>
 
                         <div className="mt-4 grid grid-cols-2 gap-3">
-                            <InstaTile src="/images/insta1.jpg" />
-                            <InstaTile src="/images/insta2.jpg" />
-                            <InstaTile src="/images/insta3.jpg" />
-                            <InstaTile src="/images/insta4.jpg" />
+                            <InstaTile src="/images/IMG_7548.jpg" />
+                            <InstaTile src="/images/IMG_7548.jpg" />
+                            <InstaTile src="/images/IMG_7548.jpg" />
+                            <InstaTile src="/images/IMG_7548.jpg" />
+
                         </div>
 
                         <div className="mt-4">
                             <Link
-                                href="#"
+                                href="https://www.instagram.com/YOUR_INSTAGRAM_USERNAME"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="inline-flex h-10 px-5 rounded-full text-sm font-semibold items-center justify-center transition"
                                 style={{ backgroundColor: BEIGE, color: "#000" }}
                             >
                                 View More
                             </Link>
+
                         </div>
                     </div>
                 </div>

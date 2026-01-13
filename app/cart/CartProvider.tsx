@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type CartItem = {
     id: string;
@@ -23,26 +23,22 @@ type CartContextType = {
 };
 
 const CartContext = createContext<CartContextType | null>(null);
-const STORAGE_KEY = "superfood_cart_v1";
+const STORAGE_KEY = "moridam_cart_v1";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
 
     useEffect(() => {
         try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) setItems(JSON.parse(saved));
-        } catch {
-            // ignore
-        }
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) setItems(JSON.parse(raw));
+        } catch {}
     }, []);
 
     useEffect(() => {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-        } catch {
-            // ignore
-        }
+        } catch {}
     }, [items]);
 
     const count = useMemo(() => items.reduce((sum, i) => sum + i.qty, 0), [items]);
@@ -64,7 +60,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     function setQty(id: string, qty: number) {
         setItems((prev) => {
-            if (!Number.isFinite(qty) || qty <= 0) return prev.filter((x) => x.id !== id);
+            if (!Number.isFinite(qty)) return prev;
+            if (qty <= 0) return prev.filter((x) => x.id !== id);
             return prev.map((x) => (x.id === id ? { ...x, qty } : x));
         });
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { MenuItem } from "@/app/components/menu/menuStore";
 
 const categories = [
@@ -28,7 +29,7 @@ function toMenuItem(d: DbMenuItem): MenuItem {
         id: d.id,
         title: d.title,
         description: d.description ?? "",
-        price: d.price ?? 0,
+        price: Number(d.price ?? 0),
         category: d.category as any,
         image: d.image ?? undefined,
     };
@@ -46,6 +47,8 @@ async function safeJson(res: Response) {
 }
 
 export default function AdminMenuPage() {
+    const router = useRouter();
+
     const [items, setItems] = useState<MenuItem[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -70,11 +73,15 @@ export default function AdminMenuPage() {
 
         try {
             const res = await fetch("/api/menu", { cache: "no-store" });
-            const data = await safeJson(res);
 
-            if (!res.ok) {
-                throw new Error(data?.error || "Failed to load menu");
+            // ✅ if not logged in, go to login
+            if (res.status === 401) {
+                router.replace("/admin/login");
+                return;
             }
+
+            const data = await safeJson(res);
+            if (!res.ok) throw new Error(data?.error || "Failed to load menu");
 
             const list = (data as DbMenuItem[]) || [];
             setItems(list.map(toMenuItem));
@@ -87,6 +94,7 @@ export default function AdminMenuPage() {
 
     useEffect(() => {
         refresh();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function resetForm() {
@@ -116,7 +124,7 @@ export default function AdminMenuPage() {
         }
 
         const safePrice = Number(price);
-        if (Number.isNaN(safePrice) || safePrice < 0) {
+        if (!Number.isFinite(safePrice) || safePrice < 0) {
             setError("Price must be a valid number.");
             return;
         }
@@ -130,7 +138,6 @@ export default function AdminMenuPage() {
         };
 
         setSaving(true);
-
         try {
             const res = await fetch(editingId ? `/api/menu/${editingId}` : "/api/menu", {
                 method: editingId ? "PUT" : "POST",
@@ -138,10 +145,16 @@ export default function AdminMenuPage() {
                 body: JSON.stringify(payload),
             });
 
-            const data = await safeJson(res);
+            if (res.status === 401) {
+                router.replace("/admin/login");
+                return;
+            }
 
+            const data = await safeJson(res);
             if (!res.ok) {
-                throw new Error(data?.error || (editingId ? "Failed to update item" : "Failed to create item"));
+                throw new Error(
+                    data?.error || (editingId ? "Failed to update item" : "Failed to create item")
+                );
             }
 
             await refresh();
@@ -153,17 +166,20 @@ export default function AdminMenuPage() {
         }
     }
 
-    async function remove(id: string) {
+    async function removeItem(id: string) {
         setError(null);
         setSaving(true);
 
         try {
             const res = await fetch(`/api/menu/${id}`, { method: "DELETE" });
-            const data = await safeJson(res);
 
-            if (!res.ok) {
-                throw new Error(data?.error || "Failed to delete item");
+            if (res.status === 401) {
+                router.replace("/admin/login");
+                return;
             }
+
+            const data = await safeJson(res);
+            if (!res.ok) throw new Error(data?.error || "Failed to delete item");
 
             await refresh();
             if (editingId === id) resetForm();
@@ -177,7 +193,7 @@ export default function AdminMenuPage() {
     return (
         <div className="bg-[var(--bg)] min-h-screen py-10">
             <div className="max-w-[1120px] mx-auto px-5">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
                     <h1 className="text-3xl font-extrabold text-[var(--ink)]">Admin Menu</h1>
 
                     <div className="flex gap-2">
@@ -221,7 +237,9 @@ export default function AdminMenuPage() {
                                         key={i.id}
                                         className={[
                                             "rounded-xl border p-4",
-                                            editingId === i.id ? "border-[var(--color-accent)]" : "border-[var(--line)]",
+                                            editingId === i.id
+                                                ? "border-[var(--color-accent)]"
+                                                : "border-[var(--line)]",
                                         ].join(" ")}
                                     >
                                         <div className="flex items-start justify-between gap-3">
@@ -240,7 +258,7 @@ export default function AdminMenuPage() {
                                                     Edit
                                                 </button>
                                                 <button
-                                                    onClick={() => remove(i.id)}
+                                                    onClick={() => removeItem(i.id)}
                                                     disabled={saving}
                                                     className="h-9 px-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-95 disabled:opacity-60"
                                                 >
@@ -323,11 +341,12 @@ export default function AdminMenuPage() {
                                 />
                             </Field>
 
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 flex-wrap">
                                 <button
                                     onClick={save}
                                     disabled={saving}
                                     className="h-11 px-6 rounded-full bg-[var(--color-accent)] text-white font-semibold hover:opacity-95 disabled:opacity-60"
+                                    type="button"
                                 >
                                     {saving ? "Saving..." : editing ? "Update Item" : "Add Item"}
                                 </button>
@@ -335,6 +354,7 @@ export default function AdminMenuPage() {
                                 <button
                                     onClick={resetForm}
                                     className="h-11 px-6 rounded-full border border-[var(--line)] bg-white font-semibold hover:bg-slate-50"
+                                    type="button"
                                 >
                                     Clear
                                 </button>

@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/app/cart/CartProvider";
 
+const BEIGE = "#FBF4DE";
+const TEXT = "#2B2B2B";
+
 export default function CartView() {
     const { items, setQty, remove, total, clear } = useCart();
 
@@ -11,7 +14,7 @@ export default function CartView() {
         return (
             <div className="mt-6 border rounded-xl p-6 bg-white">
                 <p className="text-slate-600">Your cart is empty.</p>
-                <Link href="/menu" className="inline-block mt-4 text-teal-700 font-semibold">
+                <Link href="/menu" className="inline-block mt-4 font-semibold" style={{ color: TEXT }}>
                     Go to Menu →
                 </Link>
             </div>
@@ -20,14 +23,12 @@ export default function CartView() {
 
     return (
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-            {/* Items */}
             <div className="space-y-4">
                 {items.map((it) => (
                     <div
                         key={it.id}
                         className="border rounded-xl p-4 bg-white flex flex-col sm:flex-row gap-4"
                     >
-                        {/* Image */}
                         <div className="relative w-full sm:w-24 h-44 sm:h-24 rounded-lg overflow-hidden bg-slate-100 shrink-0">
                             {it.image ? (
                                 <Image src={it.image} alt={it.title} fill className="object-cover" />
@@ -38,11 +39,13 @@ export default function CartView() {
                             )}
                         </div>
 
-                        {/* Content */}
                         <div className="flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                                 <div>
                                     <div className="font-extrabold text-[var(--ink)]">{it.title}</div>
+                                    {it.category ? (
+                                        <div className="text-xs text-slate-500 mt-1">{it.category}</div>
+                                    ) : null}
                                 </div>
 
                                 <div className="font-extrabold text-[var(--ink)]">
@@ -50,7 +53,6 @@ export default function CartView() {
                                 </div>
                             </div>
 
-                            {/* Controls */}
                             <div className="mt-4 flex flex-wrap items-center gap-2">
                                 <button
                                     className="w-10 h-10 rounded-lg border"
@@ -76,7 +78,8 @@ export default function CartView() {
                                 </button>
 
                                 <button
-                                    className="sm:ml-auto text-sm text-red-600 font-semibold px-2 py-2"
+                                    className="sm:ml-auto text-sm font-semibold px-2 py-2"
+                                    style={{ color: "#B91C1C" }}
                                     onClick={() => remove(it.id)}
                                     type="button"
                                 >
@@ -92,7 +95,6 @@ export default function CartView() {
                 </button>
             </div>
 
-            {/* Summary */}
             <div className="border rounded-xl p-5 bg-white h-fit lg:sticky lg:top-24">
                 <div className="flex justify-between font-extrabold">
                     <span>Total</span>
@@ -101,7 +103,8 @@ export default function CartView() {
 
                 <Link
                     href="/checkout"
-                    className="mt-4 w-full h-11 rounded-lg bg-teal-700 text-white font-semibold inline-flex items-center justify-center"
+                    className="mt-4 w-full h-11 rounded-lg font-semibold inline-flex items-center justify-center"
+                    style={{ backgroundColor: BEIGE, color: TEXT }}
                 >
                     Checkout
                 </Link>
