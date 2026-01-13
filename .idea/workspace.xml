@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/app/admin/_auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/admin/_auth.ts" afterDir="false" />
-    </list>
+    <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -91,7 +89,7 @@
       <workItem from="1768012086574" duration="3235000" />
       <workItem from="1768071473771" duration="9911000" />
       <workItem from="1768112231077" duration="12806000" />
-      <workItem from="1768306146095" duration="3890000" />
+      <workItem from="1768306146095" duration="4504000" />
     </task>
     <servers />
   </component>

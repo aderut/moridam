@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useCart } from "@/app/cart/CartProvider";
-import { PH_ZONES } from "@/app/data/phZones";
+import { PH_ZONES } from "@/data/phZones";
 
 const BEIGE = "#FBF4DE";
 
