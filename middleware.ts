@@ -5,10 +5,19 @@ export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     const isAdminPage = pathname.startsWith("/admin");
-    const isAdminApi = pathname.startsWith("/api/admin") || pathname.startsWith("/api/orders");
+    const isAdminApi =
+        pathname.startsWith("/api/admin") ||
+        pathname.startsWith("/api/orders");
 
-    // Public pages + public APIs (like /api/announcements) pass through
-    if (!isAdminPage && !isAdminApi) return NextResponse.next();
+    // ✅ Allow public order placement (checkout)
+    if (pathname === "/api/orders" && req.method === "POST") {
+        return NextResponse.next();
+    }
+
+    // Allow public routes
+    if (!isAdminPage && !isAdminApi) {
+        return NextResponse.next();
+    }
 
     // Allow login page + login API
     if (pathname === "/admin/login" || pathname === "/api/admin/login") {
@@ -18,14 +27,17 @@ export function middleware(req: NextRequest) {
     const authed = req.cookies.get("admin_auth")?.value === "1";
     if (authed) return NextResponse.next();
 
-    // Redirect page requests to login
+    // Redirect page requests
     if (isAdminPage) {
         const url = req.nextUrl.clone();
         url.pathname = "/admin/login";
         return NextResponse.redirect(url);
     }
 
-    // Block admin APIs
+    // Block API requests
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
+export const config = {
+    matcher: ["/admin/:path*", "/api/admin/:path*", "/api/orders/:path*"],
+};
