@@ -5,38 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/admin/_auth.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/admin/orders/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/admin/orders/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/delivery/quote/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/delivery/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/geocode/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/orders/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/places/search/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/constants.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/delivery.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/email.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/geocode.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/supabase.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/announcements.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/phZones.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/admin/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/admin/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/admin/menu/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/admin/menu/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/menu/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/menu/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/cart/CartProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/cart/CartProvider.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/checkout/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/checkout/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/components/BlogPreview.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/BlogPreview.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/Footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/components/cart/CartView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/cart/CartView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/components/cart/CheckoutForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/cart/CheckoutForm.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/menu/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/menu/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,7 +94,7 @@
       <workItem from="1768012086574" duration="3235000" />
       <workItem from="1768071473771" duration="9911000" />
       <workItem from="1768112231077" duration="12806000" />
-      <workItem from="1768306146095" duration="1368000" />
+      <workItem from="1768306146095" duration="3054000" />
     </task>
     <servers />
   </component>

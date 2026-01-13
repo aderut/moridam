@@ -29,6 +29,3 @@ export function middleware(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
-export const config = {
-    matcher: ["/admin/:path*", "/api/admin/:path*", "/api/orders/:path*"],
-};
