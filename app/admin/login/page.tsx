@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import AdminLoginClient from "./AdminLoginClient";
 
-export const dynamic = "force-dynamic"; // avoids prerender issues for auth pages
+export const dynamic = "force-dynamic"; // prevents static prerender issues
 
 export default function AdminLoginPage() {
     return (

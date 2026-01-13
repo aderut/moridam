@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const BEIGE = "#F7EED9";
 const TEXT = "#2B2B2B";
@@ -10,12 +10,7 @@ export default function AdminLoginClient() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-
     const router = useRouter();
-    const searchParams = useSearchParams();
-
-    // optional: redirect back to where you came from
-    const next = searchParams.get("next") || "/admin/menu";
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -30,14 +25,14 @@ export default function AdminLoginClient() {
             });
 
             const text = await res.text();
-            const data = text ? JSON.parse(text) : {};
+            const data = text ? JSON.parse(text) : null;
 
             if (!res.ok) {
                 setError(data?.error || "Invalid password");
                 return;
             }
 
-            router.push(next);
+            router.push("/admin/menu");
         } catch {
             setError("Something went wrong");
         } finally {
@@ -50,6 +45,7 @@ export default function AdminLoginClient() {
             <div className="max-w-[480px] mx-auto px-5">
                 <div className="bg-white border border-[var(--line)] rounded-2xl p-6">
                     <h1 className="text-3xl font-extrabold text-[var(--ink)]">Admin Login</h1>
+
                     <p className="mt-2 text-[var(--color-muted)]">
                         Enter your admin password to manage the website.
                     </p>
