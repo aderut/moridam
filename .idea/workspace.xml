@@ -5,8 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/api/service-booking/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/components/ValentinePopup.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/menu/[id]/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/product/[id]/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/product/[id]/ui/AddToCartPanel.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/admin/menu/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/admin/menu/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/login/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/login/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/geocode/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/geocode/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/menu/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/menu/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/orders/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/orders/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/checkout/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/checkout/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/components/AboutSplit.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/AboutSplit.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/components/BrowseMenuCards.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/BrowseMenuCards.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/Footer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/components/Hero.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/Hero.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/components/ServiceBookingForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/ServiceBookingForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/components/ServicesGrid.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/ServicesGrid.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/components/menu/menuStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/menu/menuStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/email.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/email.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/menu/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/menu/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/[service]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/[service]/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,7 +117,18 @@
       <workItem from="1768012086574" duration="3235000" />
       <workItem from="1768071473771" duration="9911000" />
       <workItem from="1768112231077" duration="12806000" />
-      <workItem from="1768306146095" duration="9958000" />
+      <workItem from="1768306146095" duration="14761000" />
+      <workItem from="1768763978092" duration="12497000" />
+      <workItem from="1768839684536" duration="6750000" />
+      <workItem from="1768986850629" duration="6728000" />
+      <workItem from="1769187815988" duration="6089000" />
+      <workItem from="1769342050012" duration="2231000" />
+      <workItem from="1769364268493" duration="3335000" />
+      <workItem from="1769381775757" duration="1915000" />
+      <workItem from="1769385844574" duration="1879000" />
+      <workItem from="1769388691073" duration="2442000" />
+      <workItem from="1769391473757" duration="1910000" />
+      <workItem from="1769393667414" duration="502000" />
     </task>
     <servers />
   </component>

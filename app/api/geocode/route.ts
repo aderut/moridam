@@ -47,7 +47,10 @@ export async function POST(req: Request) {
 
         if (!coords || coords.length < 2) {
             return NextResponse.json(
-                { error: "Address not found" },
+                { error: "Address not found" +
+                        "" +
+                        "" +
+                        "" },
                 { status: 404 }
             );
         }

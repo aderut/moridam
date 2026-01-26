@@ -2,10 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 const services = [
-    { title: "Caterings", slug: "caterings", img: "/images/weddings.png" },
-    { title: "Birthdays", slug: "birthdays", img: "/images/service2.jpg" },
-    { title: "Weddings", slug: "weddings", img: "/images/weddings.png" },
-    { title: "Events", slug: "events", img: "/images/service4.jpg" },
+    { title: "Caterings", slug: "caterings", img: "/images/catering.JPG" },
+    { title: "Birthdays", slug: "birthdays", img: "/images/Birthday.JPG" },
+    { title: "Weddings", slug: "weddings", img: "/images/wedding.jpg" },
+    { title: "Events", slug: "events", img: "/images/Events.JPG" },
 ];
 
 export default function ServicesGrid() {
@@ -20,7 +20,7 @@ export default function ServicesGrid() {
                     {services.map((s) => (
                         <Link
                             key={s.slug}
-                            href={`/services/${s.slug}`}
+                            href={`/services/book?service=${s.slug}`} // ✅ FIXED
                             className="group block"
                         >
                             <div className="relative h-44 rounded-2xl overflow-hidden border border-[var(--line)] bg-white">
@@ -33,14 +33,9 @@ export default function ServicesGrid() {
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
                             </div>
 
-                            {/* ✅ Hover → beige */}
-                            <div
-                                className="mt-3 font-bold transition-colors"
-                                style={{ color: "var(--ink)" }}
-                            >
-                <span className="group-hover:text-[#FBF5E6]">
-                  {s.title}
-                </span>
+                            {/* Title */}
+                            <div className="mt-3 font-bold transition-colors text-[var(--ink)] group-hover:text-[#FBF4DE]">
+                                {s.title}
                             </div>
 
                             <p className="mt-1 text-sm text-[var(--color-muted)]">

@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+const BEIGE = "#FBF4DE";
+const TEXT = "#2B2B2B";
+
 export default function ServiceBookingForm({ service }: { service: string }) {
     const [form, setForm] = useState({
         fullName: "",
@@ -14,35 +17,46 @@ export default function ServiceBookingForm({ service }: { service: string }) {
     });
 
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
         setForm((p) => ({ ...p, [key]: value }));
     }
 
-    function onSubmit(e: React.FormEvent) {
+    async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        // For now: just save locally (later you can send to API)
-        const payload = { service, ...form, createdAt: new Date().toISOString() };
-        localStorage.setItem("last_service_booking", JSON.stringify(payload));
+        const payload = { service, ...form };
+
+        const res = await fetch("/api/bookings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            alert(data?.error || "Failed to send request");
+            console.log("Booking error details:", data);
+            return;
+        }
 
         setSubmitted(true);
     }
 
+
     if (submitted) {
         return (
             <div>
-                <div className="text-xl font-extrabold text-[var(--ink)]">
-                    Request sent ✅
-                </div>
+                <div className="text-xl font-extrabold text-[var(--ink)]">Request sent ✅</div>
                 <p className="mt-2 text-[var(--color-muted)]">
-                    We saved your request. Next step is connecting this to email or a database.
+                    Your booking request has been emailed to Moridam Catering.
                 </p>
 
                 <div className="mt-5 rounded-xl bg-slate-50 border border-[var(--line)] p-4 text-sm">
-                    <div className="font-bold text-[var(--ink)] capitalize">
-                        {service} booking
-                    </div>
+                    <div className="font-bold text-[var(--ink)] capitalize">{service} booking</div>
                     <div className="mt-2 text-slate-700">
                         Guests: <span className="font-semibold">{form.guests}</span>
                     </div>
@@ -56,6 +70,12 @@ export default function ServiceBookingForm({ service }: { service: string }) {
 
     return (
         <form onSubmit={onSubmit} className="space-y-4">
+            {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                    {error}
+                </div>
+            )}
+
             <div className="grid md:grid-cols-2 gap-4">
                 <Field label="Full Name">
                     <input
@@ -114,7 +134,7 @@ export default function ServiceBookingForm({ service }: { service: string }) {
                         value={form.location}
                         onChange={(e) => update("location", e.target.value)}
                         className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                        placeholder="Lagos, Abuja..."
+                        placeholder="Port Harcourt..."
                     />
                 </Field>
             </div>
@@ -130,21 +150,17 @@ export default function ServiceBookingForm({ service }: { service: string }) {
 
             <button
                 type="submit"
-                className="h-11 px-6 rounded-full bg-[var(--color-accent)] text-white font-semibold hover:opacity-95"
+                disabled={loading}
+                className="h-11 px-6 rounded-full font-semibold disabled:opacity-60"
+                style={{ backgroundColor: BEIGE, color: TEXT }}
             >
-                Submit Request
+                {loading ? "Sending..." : "Submit Request"}
             </button>
         </form>
     );
 }
 
-function Field({
-                   label,
-                   children,
-               }: {
-    label: string;
-    children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
         <label className="block">
             <div className="text-sm font-semibold text-[var(--ink)] mb-2">{label}</div>

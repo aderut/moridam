@@ -10,7 +10,7 @@ export async function sendOrderEmail(payload: {
     address: string;
     note?: string;
     subtotal: number;
-    deliveryFee: number;
+    deliveryFee: number; // keep, but we’ll pass 0
     total: number;
     items: Array<{ title: string; qty: number; price: number }>;
 }) {
@@ -35,7 +35,7 @@ Items:
 ${itemsLines}
 
 Subtotal: ₦${payload.subtotal.toLocaleString()}
-Delivery: ₦${payload.deliveryFee.toLocaleString()}
+Delivery: ₦${(payload.deliveryFee || 0).toLocaleString()}
 Total: ₦${payload.total.toLocaleString()}
 `;
 

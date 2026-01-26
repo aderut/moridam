@@ -24,10 +24,10 @@ export default function AboutSplit() {
                             className="absolute -bottom-6 left-6 rounded-2xl p-5 w-[280px] shadow-xl"
                             style={{ backgroundColor: BEIGE, color: "#000" }}
                         >
-                            <div className="font-bold">Come and visit us</div>
+                            <div className="font-bold">Contact us</div>
                             <div className="mt-3 text-sm space-y-2 text-black/80">
                                 <div className="flex items-center gap-2">
-                                    <Phone className="w-4 h-4" /> +234 816 163 7306
+                                    <Phone className="w-4 h-4" /> +234 814 163 7306
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Mail className="w-4 h-4" /> moridamcatering@gmail.com

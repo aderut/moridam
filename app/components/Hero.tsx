@@ -9,7 +9,7 @@ export default function HeroBistro() {
                     {/* Background image */}
                     <div className="relative h-[360px] sm:h-[420px] md:h-[520px]">
                         <Image
-                            src="/images/Rice.PNG"
+                            src="/images/Jollof.jpeg"
                             alt="Hero"
                             fill
                             className="object-cover"

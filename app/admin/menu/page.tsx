@@ -13,7 +13,6 @@ const categories = [
 
 type CategoryValue = (typeof categories)[number]["value"];
 
-// DB shape from Supabase
 type DbMenuItem = {
     id: string;
     title: string;
@@ -26,8 +25,8 @@ type DbMenuItem = {
 
 function toMenuItem(d: DbMenuItem): MenuItem {
     return {
-        id: d.id,
-        title: d.title,
+        id: String(d.id),
+        title: String(d.title),
         description: d.description ?? "",
         price: Number(d.price ?? 0),
         category: d.category as any,
@@ -35,7 +34,6 @@ function toMenuItem(d: DbMenuItem): MenuItem {
     };
 }
 
-// ✅ prevents "Unexpected end of JSON input"
 async function safeJson(res: Response) {
     const text = await res.text();
     if (!text) return null;
@@ -44,6 +42,11 @@ async function safeJson(res: Response) {
     } catch {
         return { error: text };
     }
+}
+
+function badId(id: unknown) {
+    const s = String(id ?? "");
+    return !s || s === "undefined" || s === "null";
 }
 
 export default function AdminMenuPage() {
@@ -73,17 +76,14 @@ export default function AdminMenuPage() {
 
         try {
             const res = await fetch("/api/menu", { cache: "no-store" });
+            const data = await safeJson(res);
 
-            // ✅ if not logged in, go to login
-            if (res.status === 401) {
-                router.replace("/admin/login");
-                return;
+            if (!res.ok) {
+                if (res.status === 401) router.replace("/admin/login");
+                throw new Error((data as any)?.error || "Failed to load menu");
             }
 
-            const data = await safeJson(res);
-            if (!res.ok) throw new Error(data?.error || "Failed to load menu");
-
-            const list = (data as DbMenuItem[]) || [];
+            const list = Array.isArray(data) ? (data as DbMenuItem[]) : [];
             setItems(list.map(toMenuItem));
         } catch (e: any) {
             setError(e?.message || "Failed to load menu");
@@ -94,7 +94,6 @@ export default function AdminMenuPage() {
 
     useEffect(() => {
         refresh();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function resetForm() {
@@ -129,6 +128,12 @@ export default function AdminMenuPage() {
             return;
         }
 
+        // ✅ Guard editingId
+        if (editingId && badId(editingId)) {
+            setError("Invalid item id. Refresh the page and try again.");
+            return;
+        }
+
         const payload = {
             title: title.trim(),
             description: desc.trim(),
@@ -138,6 +143,7 @@ export default function AdminMenuPage() {
         };
 
         setSaving(true);
+
         try {
             const res = await fetch(editingId ? `/api/menu/${editingId}` : "/api/menu", {
                 method: editingId ? "PUT" : "POST",
@@ -145,16 +151,10 @@ export default function AdminMenuPage() {
                 body: JSON.stringify(payload),
             });
 
-            if (res.status === 401) {
-                router.replace("/admin/login");
-                return;
-            }
-
             const data = await safeJson(res);
             if (!res.ok) {
-                throw new Error(
-                    data?.error || (editingId ? "Failed to update item" : "Failed to create item")
-                );
+                if (res.status === 401) router.replace("/admin/login");
+                throw new Error((data as any)?.error || "Save failed");
             }
 
             await refresh();
@@ -168,18 +168,21 @@ export default function AdminMenuPage() {
 
     async function removeItem(id: string) {
         setError(null);
-        setSaving(true);
 
+        if (badId(id)) {
+            setError("This item has no valid id. Refresh and try again.");
+            return;
+        }
+
+        setSaving(true);
         try {
             const res = await fetch(`/api/menu/${id}`, { method: "DELETE" });
-
-            if (res.status === 401) {
-                router.replace("/admin/login");
-                return;
-            }
-
             const data = await safeJson(res);
-            if (!res.ok) throw new Error(data?.error || "Failed to delete item");
+
+            if (!res.ok) {
+                if (res.status === 401) router.replace("/admin/login");
+                throw new Error((data as any)?.error || "Failed to delete item");
+            }
 
             await refresh();
             if (editingId === id) resetForm();
@@ -200,6 +203,7 @@ export default function AdminMenuPage() {
                         <button
                             onClick={refresh}
                             className="h-10 px-4 rounded-full border border-[var(--line)] bg-white font-semibold hover:bg-slate-50"
+                            type="button"
                         >
                             {loading ? "Loading..." : "Refresh"}
                         </button>
@@ -207,6 +211,7 @@ export default function AdminMenuPage() {
                         <button
                             onClick={resetForm}
                             className="h-10 px-4 rounded-full border border-[var(--line)] bg-white font-semibold hover:bg-slate-50"
+                            type="button"
                         >
                             New Item
                         </button>
@@ -220,15 +225,13 @@ export default function AdminMenuPage() {
                 )}
 
                 <div className="mt-8 grid lg:grid-cols-[0.95fr_1.05fr] gap-6">
-                    {/* Left: list */}
+                    {/* Left */}
                     <div className="bg-white border border-[var(--line)] rounded-2xl p-5">
                         <div className="font-extrabold text-[var(--ink)]">Menu Items</div>
 
                         {items.length === 0 ? (
                             <div className="mt-4 text-sm text-[var(--color-muted)]">
-                                {loading
-                                    ? "Loading items..."
-                                    : "No items yet. Add your first menu item using the form on the right."}
+                                {loading ? "Loading items..." : "No items yet."}
                             </div>
                         ) : (
                             <div className="mt-4 space-y-3">
@@ -237,9 +240,7 @@ export default function AdminMenuPage() {
                                         key={i.id}
                                         className={[
                                             "rounded-xl border p-4",
-                                            editingId === i.id
-                                                ? "border-[var(--color-accent)]"
-                                                : "border-[var(--line)]",
+                                            editingId === i.id ? "border-[var(--color-accent)]" : "border-[var(--line)]",
                                         ].join(" ")}
                                     >
                                         <div className="flex items-start justify-between gap-3">
@@ -254,6 +255,7 @@ export default function AdminMenuPage() {
                                                 <button
                                                     onClick={() => startEdit(i)}
                                                     className="h-9 px-3 rounded-full border border-[var(--line)] bg-white text-sm font-semibold hover:bg-slate-50"
+                                                    type="button"
                                                 >
                                                     Edit
                                                 </button>
@@ -261,6 +263,7 @@ export default function AdminMenuPage() {
                                                     onClick={() => removeItem(i.id)}
                                                     disabled={saving}
                                                     className="h-9 px-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-95 disabled:opacity-60"
+                                                    type="button"
                                                 >
                                                     Delete
                                                 </button>
@@ -280,7 +283,7 @@ export default function AdminMenuPage() {
                         )}
                     </div>
 
-                    {/* Right: editor */}
+                    {/* Right */}
                     <div className="bg-white border border-[var(--line)] rounded-2xl p-5">
                         <div className="font-extrabold text-[var(--ink)]">
                             {editing ? "Edit Item" : "Create Item"}

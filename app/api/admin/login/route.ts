@@ -1,30 +1,23 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
-export async function POST(req: NextRequest) {
+export const runtime = "nodejs"; // keep it nodejs on Vercel
+
+export async function POST(req: Request) {
     try {
         const body = await req.json().catch(() => null);
-        const password = body?.password;
+        const password = String(body?.password ?? "").trim();
 
-        if (!process.env.ADMIN_PASSWORD) {
-            return NextResponse.json(
-                { error: "ADMIN_PASSWORD not set" },
-                { status: 500 }
-            );
+        const envPass = process.env.ADMIN_PASSWORD;
+        if (!envPass) {
+            return NextResponse.json({ error: "ADMIN_PASSWORD not set" }, { status: 500 });
         }
 
         if (!password) {
-            return NextResponse.json(
-                { error: "Password is required" },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: "Password is required" }, { status: 400 });
         }
 
-        if (password !== process.env.ADMIN_PASSWORD) {
-            return NextResponse.json(
-                { error: "Wrong password" },
-                { status: 401 }
-            );
+        if (password !== envPass) {
+            return NextResponse.json({ error: "Wrong password" }, { status: 401 });
         }
 
         const res = NextResponse.json({ ok: true });
@@ -39,9 +32,6 @@ export async function POST(req: NextRequest) {
 
         return res;
     } catch (e: any) {
-        return NextResponse.json(
-            { error: e?.message || "Login failed" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: e?.message || "Login failed" }, { status: 500 });
     }
 }

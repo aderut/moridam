@@ -2,19 +2,13 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import type { MenuCategory, MenuItem } from "@/app/components/menu/menuStore";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/app/cart/CartProvider";
 
-const BRAND_BG = "#F7EED9";
-const BRAND_TEXT = "#2B2B2B";
+const CREAM = "#FBF4DE";
+const INK = "#2B2B2B";
 
-const tabs: { label: string; value: MenuCategory }[] = [
-    { label: "All", value: "all" },
-    { label: "Food", value: "food" },
-    { label: "Pastries", value: "pastries" },
-    { label: "Drinks", value: "drinks" },
-    { label: "Cakes", value: "cakes" },
-];
+type MenuCategory = "all" | "food" | "pastries" | "drinks" | "cakes";
 
 type DbMenuItem = {
     id: string;
@@ -26,18 +20,35 @@ type DbMenuItem = {
     created_at?: string;
 };
 
+type MenuItem = {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    category: MenuCategory;
+    image?: string;
+};
+
+const tabs: { label: string; value: MenuCategory }[] = [
+    { label: "All", value: "all" },
+    { label: "Food", value: "food" },
+    { label: "Pastries", value: "pastries" },
+    { label: "Drinks", value: "drinks" },
+    { label: "Cakes", value: "cakes" },
+];
+
 function toMenuItem(d: DbMenuItem): MenuItem {
+    const cat = String(d.category || "").toLowerCase() as MenuCategory;
     return {
         id: d.id,
         title: d.title,
         description: d.description ?? "",
         price: Number(d.price ?? 0),
-        category: d.category as any,
+        category: (tabs.some((t) => t.value === cat) ? cat : "food") as MenuCategory,
         image: d.image ?? undefined,
     };
 }
 
-// ✅ Safe parse: avoids "Unexpected end of JSON input"
 async function safeJson(res: Response) {
     const text = await res.text();
     if (!text) return null;
@@ -48,21 +59,21 @@ async function safeJson(res: Response) {
     }
 }
 
-// ✅ Avoid console errors breaking build (no-console)
-function devLog(...args: any[]) {
-    if (process.env.NODE_ENV !== "production") {
-        // eslint-disable-next-line no-console
-        console.log(...args);
-    }
-}
-
 export default function MenuPage() {
+    const router = useRouter();
+    const { add } = useCart();
+
     const [items, setItems] = useState<MenuItem[]>([]);
     const [active, setActive] = useState<MenuCategory>("all");
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
 
-    const { add } = useCart();
+    // Optional: read ?category=cakes on first load (without useSearchParams)
+    useEffect(() => {
+        const sp = new URLSearchParams(window.location.search);
+        const c = (sp.get("category") || "").toLowerCase() as MenuCategory;
+        if (tabs.some((t) => t.value === c)) setActive(c);
+    }, []);
 
     useEffect(() => {
         let alive = true;
@@ -76,7 +87,6 @@ export default function MenuPage() {
                 const data = await safeJson(res);
 
                 if (!res.ok) {
-                    devLog("Menu API error:", data);
                     if (!alive) return;
                     setItems([]);
                     setLoadError((data as any)?.error || "Failed to load menu");
@@ -87,7 +97,6 @@ export default function MenuPage() {
                 if (!alive) return;
                 setItems(list.map(toMenuItem));
             } catch (e: any) {
-                devLog("Failed to fetch menu:", e);
                 if (!alive) return;
                 setItems([]);
                 setLoadError(e?.message || "Failed to load menu");
@@ -110,18 +119,22 @@ export default function MenuPage() {
     return (
         <div className="bg-[var(--bg)] min-h-screen pt-20 pb-12">
             <div className="max-w-[1120px] mx-auto px-5">
-                {/* Title */}
-                <div className="text-center">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-[var(--ink)]">
-                        Our Menu
-                    </h1>
-                    <p className="mt-3 text-[var(--color-muted)] max-w-2xl mx-auto">
-                        Browse our menu and add items to cart.
-                    </p>
+                {/* Title row (Plato-ish) */}
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-[var(--ink)]">
+                            Featured favorites
+                        </h1>
+                        <div className="mt-3 text-[var(--color-muted)] font-semibold">
+                            {loading ? "Loading..." : `${filtered.length} item${filtered.length === 1 ? "" : "s"}`}
+                        </div>
+                    </div>
+
+
                 </div>
 
-                {/* Tabs */}
-                <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
+                {/* Tabs row */}
+                <div className="mt-6 flex items-center gap-3 overflow-x-auto pb-2">
                     {tabs.map((t) => {
                         const on = t.value === active;
                         return (
@@ -129,10 +142,10 @@ export default function MenuPage() {
                                 key={t.value}
                                 type="button"
                                 onClick={() => setActive(t.value)}
-                                className={`h-10 px-5 rounded-full border text-sm font-semibold transition ${
-                                    on ? "border-transparent" : "bg-white border-[var(--line)] hover:bg-slate-50"
+                                className={`shrink-0 h-10 px-4 rounded-xl text-sm font-semibold transition border ${
+                                    on ? "border-transparent" : "border-[var(--line)] bg-white hover:bg-slate-50"
                                 }`}
-                                style={on ? { backgroundColor: BRAND_BG, color: BRAND_TEXT } : {}}
+                                style={on ? { backgroundColor: INK, color: "white" } : {}}
                             >
                                 {t.label}
                             </button>
@@ -140,28 +153,33 @@ export default function MenuPage() {
                     })}
                 </div>
 
-                {/* Loading / Error */}
+                {/* States */}
                 {loading ? (
-                    <div className="mt-12 text-center text-[var(--color-muted)]">
-                        Loading menu...
-                    </div>
+                    <div className="mt-10 text-center text-[var(--color-muted)]">Loading menu...</div>
                 ) : loadError ? (
-                    <div className="mt-12 text-center text-red-600 font-semibold">
-                        {loadError}
-                    </div>
-                ) : filtered.length > 0 ? (
-                    <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="mt-10 text-center text-red-600 font-semibold">{loadError}</div>
+                ) : filtered.length === 0 ? (
+                    <div className="mt-10 text-center text-[var(--color-muted)]">No items yet.</div>
+                ) : (
+                    <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {filtered.map((item) => (
                             <div
                                 key={item.id}
-                                className="relative bg-white border border-[var(--line)] rounded-2xl overflow-hidden"
+                                className="relative rounded-2xl bg-white border border-[var(--line)] overflow-hidden cursor-pointer hover:shadow-sm transition"
+                                onClick={() => router.push(`/product/${item.id}`)}
                             >
                                 {/* Image */}
-                                <div className="relative h-40 bg-slate-100">
+                                <div className="relative h-44 bg-slate-100">
                                     {item.image ? (
-                                        <Image src={item.image} alt={item.title} fill className="object-cover" />
+                                        <Image
+                                            src={item.image}
+                                            alt={item.title}
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 768px) 100vw, 260px"
+                                        />
                                     ) : (
-                                        <div className="absolute inset-0 grid place-items-center text-slate-400 text-sm pointer-events-none">
+                                        <div className="absolute inset-0 grid place-items-center text-slate-400 text-sm">
                                             No image
                                         </div>
                                     )}
@@ -169,47 +187,41 @@ export default function MenuPage() {
 
                                 {/* Content */}
                                 <div className="p-4">
-                                    <div className="text-[11px] uppercase tracking-wide text-slate-500">
-                                        {item.category}
-                                    </div>
+                                    <div className="font-extrabold text-[var(--ink)]">{item.title}</div>
 
-                                    <div className="mt-1 flex items-start justify-between gap-3">
-                                        <div className="font-extrabold text-[var(--ink)] leading-tight">
-                                            {item.title}
+                                    <div className="mt-3 flex items-center justify-between">
+                                        {/* Price pill (CREAM) */}
+                                        <div
+                                            className="h-10 px-4 rounded-xl inline-flex items-center text-sm font-bold"
+                                            style={{ backgroundColor: CREAM, color: INK }}
+                                        >
+                                            ₦{Number(item.price ?? 0).toLocaleString()}
                                         </div>
-                                        <div className="font-extrabold" style={{ color: BRAND_TEXT }}>
-                                            ₦{item.price.toLocaleString()}
-                                        </div>
+
+                                        {/* + button (CREAM) */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                add({
+                                                    id: item.id,
+                                                    title: item.title,
+                                                    price: Number(item.price ?? 0),
+                                                    image: item.image || "",
+                                                    category: item.category,
+                                                    description: item.description,
+                                                });
+                                            }}
+                                            className="h-10 w-10 rounded-xl grid place-items-center font-extrabold hover:opacity-90"
+                                            style={{ backgroundColor: CREAM, color: INK }}
+                                            aria-label="Add to cart"
+                                        >
+                                            +
+                                        </button>
                                     </div>
-
-                                    <p className="mt-2 text-sm text-[var(--color-muted)] leading-6 line-clamp-2">
-                                        {item.description}
-                                    </p>
-
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            add({
-                                                id: item.id,
-                                                title: item.title,
-                                                price: item.price,
-                                                image: item.image || "",
-                                                category: item.category,
-                                                description: item.description,
-                                            })
-                                        }
-                                        className="mt-4 w-full h-10 rounded-full font-semibold transition hover:opacity-90"
-                                        style={{ backgroundColor: BRAND_BG, color: BRAND_TEXT }}
-                                    >
-                                        Add to Cart
-                                    </button>
                                 </div>
                             </div>
                         ))}
-                    </div>
-                ) : (
-                    <div className="mt-12 text-center text-[var(--color-muted)]">
-                        No items yet.
                     </div>
                 )}
             </div>
