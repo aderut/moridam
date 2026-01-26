@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/components/ValentinePopup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/ValentinePopup.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,7 +103,7 @@
       <workItem from="1769388691073" duration="2442000" />
       <workItem from="1769391473757" duration="1910000" />
       <workItem from="1769393667414" duration="2040000" />
-      <workItem from="1769397074256" duration="318000" />
+      <workItem from="1769397074256" duration="1471000" />
     </task>
     <servers />
   </component>
