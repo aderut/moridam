@@ -22,6 +22,10 @@ export default function CheckoutPage() {
     const [done, setDone] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
 
+    // ✅ store final values so WhatsApp total never becomes 0 after clear()
+    const [finalTotal, setFinalTotal] = useState<number>(0);
+    const [finalMethod, setFinalMethod] = useState<Method>("delivery");
+
     // ✅ NO delivery fee
     const grandTotal = useMemo(() => subtotal, [subtotal]);
 
@@ -35,6 +39,10 @@ export default function CheckoutPage() {
         }
 
         setSaving(true);
+
+        // ✅ capture totals BEFORE clearing cart
+        const totalNow = grandTotal;
+
         try {
             const payload = {
                 fullName,
@@ -42,7 +50,7 @@ export default function CheckoutPage() {
                 note,
                 items,
                 subtotal,
-                total: grandTotal,
+                total: totalNow,
                 method,
                 deliveryFee: 0,
                 address: method === "delivery" ? address : PICKUP_LABEL,
@@ -57,8 +65,14 @@ export default function CheckoutPage() {
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data?.error || "Order failed");
 
-            setOrderId(data?.order?.id || data?.id || null);
-            clear();
+            const id = data?.order?.id || data?.id || null;
+            setOrderId(id);
+
+            // ✅ store values for success page BEFORE clear()
+            setFinalTotal(totalNow);
+            setFinalMethod(method);
+
+            clear(); // ✅ safe now
             setDone(true);
         } catch (err: any) {
             alert(err?.message || "Order failed");
@@ -75,8 +89,8 @@ export default function CheckoutPage() {
 I have placed an order successfully.
 
 Order ID: ${orderId ?? "N/A"}
-Order Method: ${method}
-Total Amount: ₦${grandTotal.toLocaleString()}`
+Order Method: ${finalMethod}
+Total Amount: ₦${finalTotal.toLocaleString()}`
         );
 
         return (

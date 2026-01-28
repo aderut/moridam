@@ -10,7 +10,7 @@ export default function CartPage() {
     const { items, total, remove, setQty, clear } = useCart();
 
     return (
-        <div className="bg-[var(--bg)] min-h-screen pt-16 sm:pt-20 pb-12">
+        <div className="bg-[var(--bg)] min-h-screen pt-16 sm:pt-90 pb-12">
             <div className="max-w-[1120px] mx-auto px-4 sm:px-5">
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-[var(--ink)]">
                     Your Cart

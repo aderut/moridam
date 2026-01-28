@@ -119,18 +119,20 @@ export default function MenuPage() {
     return (
         <div className="bg-[var(--bg)] min-h-screen pt-20 pb-12">
             <div className="max-w-[1120px] mx-auto px-5">
-                {/* Title row (Plato-ish) */}
+                {/* Title row */}
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div>
                         <h1 className="text-3xl md:text-4xl font-extrabold text-[var(--ink)]">
                             Featured favorites
                         </h1>
+
+                        {/* ✅ No "Loading..." text here anymore */}
                         <div className="mt-3 text-[var(--color-muted)] font-semibold">
-                            {loading ? "Loading..." : `${filtered.length} item${filtered.length === 1 ? "" : "s"}`}
+                            {loadError
+                                ? ""
+                                : `${filtered.length} item${filtered.length === 1 ? "" : "s"}`}
                         </div>
                     </div>
-
-
                 </div>
 
                 {/* Tabs row */}
@@ -143,7 +145,9 @@ export default function MenuPage() {
                                 type="button"
                                 onClick={() => setActive(t.value)}
                                 className={`shrink-0 h-10 px-4 rounded-xl text-sm font-semibold transition border ${
-                                    on ? "border-transparent" : "border-[var(--line)] bg-white hover:bg-slate-50"
+                                    on
+                                        ? "border-transparent"
+                                        : "border-[var(--line)] bg-white hover:bg-slate-50"
                                 }`}
                                 style={on ? { backgroundColor: INK, color: "white" } : {}}
                             >
@@ -153,14 +157,16 @@ export default function MenuPage() {
                     })}
                 </div>
 
-                {/* States */}
-                {loading ? (
-                    <div className="mt-10 text-center text-[var(--color-muted)]">Loading menu...</div>
-                ) : loadError ? (
-                    <div className="mt-10 text-center text-red-600 font-semibold">{loadError}</div>
-                ) : filtered.length === 0 ? (
-                    <div className="mt-10 text-center text-[var(--color-muted)]">No items yet.</div>
-                ) : (
+                {/* ✅ States (NO loading text). Just show nothing while loading */}
+                {loadError ? (
+                    <div className="mt-10 text-center text-red-600 font-semibold">
+                        {loadError}
+                    </div>
+                ) : !loading && filtered.length === 0 ? (
+                    <div className="mt-10 text-center text-[var(--color-muted)]">
+                        No items yet.
+                    </div>
+                ) : !loading ? (
                     <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {filtered.map((item) => (
                             <div
@@ -187,10 +193,12 @@ export default function MenuPage() {
 
                                 {/* Content */}
                                 <div className="p-4">
-                                    <div className="font-extrabold text-[var(--ink)]">{item.title}</div>
+                                    <div className="font-extrabold text-[var(--ink)]">
+                                        {item.title}
+                                    </div>
 
                                     <div className="mt-3 flex items-center justify-between">
-                                        {/* Price pill (CREAM) */}
+                                        {/* Price pill */}
                                         <div
                                             className="h-10 px-4 rounded-xl inline-flex items-center text-sm font-bold"
                                             style={{ backgroundColor: CREAM, color: INK }}
@@ -198,7 +206,7 @@ export default function MenuPage() {
                                             ₦{Number(item.price ?? 0).toLocaleString()}
                                         </div>
 
-                                        {/* + button (CREAM) */}
+                                        {/* Add button */}
                                         <button
                                             type="button"
                                             onClick={(e) => {
@@ -223,6 +231,9 @@ export default function MenuPage() {
                             </div>
                         ))}
                     </div>
+                ) : (
+                    // ✅ while loading: show NOTHING (no text)
+                    <div className="mt-8" />
                 )}
             </div>
         </div>

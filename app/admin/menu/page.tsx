@@ -13,6 +13,13 @@ const categories = [
 
 type CategoryValue = (typeof categories)[number]["value"];
 
+export type OptionGroup = {
+    name: string; // e.g. "Flavor"
+    type: "single" | "multi"; // single = radio, multi = checkbox
+    required?: boolean;
+    choices: string[]; // e.g. ["Vanilla","Chocolate"]
+};
+
 type DbMenuItem = {
     id: string;
     title: string;
@@ -20,10 +27,11 @@ type DbMenuItem = {
     price: number;
     category: string;
     image: string | null;
+    options?: OptionGroup[] | null;
     created_at?: string;
 };
 
-function toMenuItem(d: DbMenuItem): MenuItem {
+function toMenuItem(d: DbMenuItem): (MenuItem & { options?: OptionGroup[] | null }) {
     return {
         id: String(d.id),
         title: String(d.title),
@@ -31,6 +39,7 @@ function toMenuItem(d: DbMenuItem): MenuItem {
         price: Number(d.price ?? 0),
         category: d.category as any,
         image: d.image ?? undefined,
+        options: Array.isArray(d.options) ? d.options : null,
     };
 }
 
@@ -49,17 +58,34 @@ function badId(id: unknown) {
     return !s || s === "undefined" || s === "null";
 }
 
+function normalizeChoices(input: string) {
+    return input
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
+}
+
 export default function AdminMenuPage() {
     const router = useRouter();
 
-    const [items, setItems] = useState<MenuItem[]>([]);
+    const [items, setItems] = useState<(MenuItem & { options?: OptionGroup[] | null })[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
 
+    // Form fields
     const [title, setTitle] = useState("");
     const [desc, setDesc] = useState("");
     const [price, setPrice] = useState<number>(0);
     const [category, setCategory] = useState<CategoryValue>("food");
     const [image, setImage] = useState("");
+
+    // ✅ Options for this item
+    const [options, setOptions] = useState<OptionGroup[]>([]);
+
+    // ✅ Option builder inputs
+    const [optName, setOptName] = useState("");
+    const [optType, setOptType] = useState<"single" | "multi">("single");
+    const [optRequired, setOptRequired] = useState(false);
+    const [optChoices, setOptChoices] = useState("");
 
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -94,6 +120,7 @@ export default function AdminMenuPage() {
 
     useEffect(() => {
         refresh();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function resetForm() {
@@ -103,15 +130,68 @@ export default function AdminMenuPage() {
         setPrice(0);
         setCategory("food");
         setImage("");
+
+        setOptions([]);
+        setOptName("");
+        setOptType("single");
+        setOptRequired(false);
+        setOptChoices("");
     }
 
-    function startEdit(i: MenuItem) {
+    function startEdit(i: MenuItem & { options?: OptionGroup[] | null }) {
         setEditingId(i.id);
         setTitle(i.title);
         setDesc(i.description);
         setPrice(i.price);
         setCategory(i.category as CategoryValue);
         setImage(i.image ?? "");
+
+        setOptions(Array.isArray(i.options) ? i.options : []);
+        setOptName("");
+        setOptType("single");
+        setOptRequired(false);
+        setOptChoices("");
+    }
+
+    function addOptionGroup() {
+        setError(null);
+
+        const name = optName.trim();
+        const choices = normalizeChoices(optChoices);
+
+        if (!name) {
+            setError("Option group name is required (e.g. Flavor).");
+            return;
+        }
+        if (choices.length < 2) {
+            setError("Please add at least 2 choices (comma separated).");
+            return;
+        }
+
+        // prevent duplicates by name (case-insensitive)
+        if (options.some((g) => g.name.toLowerCase() === name.toLowerCase())) {
+            setError("That option group already exists for this item.");
+            return;
+        }
+
+        const group: OptionGroup = {
+            name,
+            type: optType,
+            required: optRequired || undefined,
+            choices,
+        };
+
+        setOptions((prev) => [...prev, group]);
+
+        // reset builder
+        setOptName("");
+        setOptType("single");
+        setOptRequired(false);
+        setOptChoices("");
+    }
+
+    function removeOptionGroup(name: string) {
+        setOptions((prev) => prev.filter((g) => g.name !== name));
     }
 
     async function save() {
@@ -128,9 +208,8 @@ export default function AdminMenuPage() {
             return;
         }
 
-        // ✅ Guard editingId
         if (editingId && badId(editingId)) {
-            setError("Invalid item id. Refresh the page and try again.");
+            setError("Invalid item id. Refresh and try again.");
             return;
         }
 
@@ -140,6 +219,7 @@ export default function AdminMenuPage() {
             price: safePrice,
             category,
             image: image.trim() ? image.trim() : null,
+            options: options.length > 0 ? options : null, // ✅ jsonb
         };
 
         setSaving(true);
@@ -152,9 +232,13 @@ export default function AdminMenuPage() {
             });
 
             const data = await safeJson(res);
+
             if (!res.ok) {
                 if (res.status === 401) router.replace("/admin/login");
-                throw new Error((data as any)?.error || "Save failed");
+                throw new Error(
+                    (data as any)?.error ||
+                    (editingId ? "Failed to update item" : "Failed to create item")
+                );
             }
 
             await refresh();
@@ -202,16 +286,16 @@ export default function AdminMenuPage() {
                     <div className="flex gap-2">
                         <button
                             onClick={refresh}
-                            className="h-10 px-4 rounded-full border border-[var(--line)] bg-white font-semibold hover:bg-slate-50"
                             type="button"
+                            className="h-10 px-4 rounded-full border border-[var(--line)] bg-white font-semibold hover:bg-slate-50"
                         >
                             {loading ? "Loading..." : "Refresh"}
                         </button>
 
                         <button
                             onClick={resetForm}
-                            className="h-10 px-4 rounded-full border border-[var(--line)] bg-white font-semibold hover:bg-slate-50"
                             type="button"
+                            className="h-10 px-4 rounded-full border border-[var(--line)] bg-white font-semibold hover:bg-slate-50"
                         >
                             New Item
                         </button>
@@ -225,7 +309,7 @@ export default function AdminMenuPage() {
                 )}
 
                 <div className="mt-8 grid lg:grid-cols-[0.95fr_1.05fr] gap-6">
-                    {/* Left */}
+                    {/* LEFT: LIST */}
                     <div className="bg-white border border-[var(--line)] rounded-2xl p-5">
                         <div className="font-extrabold text-[var(--ink)]">Menu Items</div>
 
@@ -240,7 +324,9 @@ export default function AdminMenuPage() {
                                         key={i.id}
                                         className={[
                                             "rounded-xl border p-4",
-                                            editingId === i.id ? "border-[var(--color-accent)]" : "border-[var(--line)]",
+                                            editingId === i.id
+                                                ? "border-[var(--color-accent)]"
+                                                : "border-[var(--line)]",
                                         ].join(" ")}
                                     >
                                         <div className="flex items-start justify-between gap-3">
@@ -254,16 +340,16 @@ export default function AdminMenuPage() {
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => startEdit(i)}
-                                                    className="h-9 px-3 rounded-full border border-[var(--line)] bg-white text-sm font-semibold hover:bg-slate-50"
                                                     type="button"
+                                                    className="h-9 px-3 rounded-full border border-[var(--line)] bg-white text-sm font-semibold hover:bg-slate-50"
                                                 >
                                                     Edit
                                                 </button>
                                                 <button
                                                     onClick={() => removeItem(i.id)}
                                                     disabled={saving}
-                                                    className="h-9 px-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-95 disabled:opacity-60"
                                                     type="button"
+                                                    className="h-9 px-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-95 disabled:opacity-60"
                                                 >
                                                     Delete
                                                 </button>
@@ -271,6 +357,20 @@ export default function AdminMenuPage() {
                                         </div>
 
                                         <p className="mt-2 text-sm text-[var(--color-muted)]">{i.description}</p>
+
+                                        {Array.isArray(i.options) && i.options.length > 0 && (
+                                            <div className="mt-3 text-xs text-slate-600">
+                                                <div className="font-semibold">Options:</div>
+                                                <ul className="mt-1 list-disc pl-5 space-y-1">
+                                                    {i.options.map((g) => (
+                                                        <li key={g.name}>
+                                                            <b>{g.name}</b> ({g.type}
+                                                            {g.required ? ", required" : ""}) — {g.choices.join(", ")}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
 
                                         {i.image && (
                                             <div className="mt-2 text-xs text-slate-500">
@@ -283,7 +383,7 @@ export default function AdminMenuPage() {
                         )}
                     </div>
 
-                    {/* Right */}
+                    {/* RIGHT: EDITOR */}
                     <div className="bg-white border border-[var(--line)] rounded-2xl p-5">
                         <div className="font-extrabold text-[var(--ink)]">
                             {editing ? "Edit Item" : "Create Item"}
@@ -344,20 +444,111 @@ export default function AdminMenuPage() {
                                 />
                             </Field>
 
+                            {/* ✅ OPTIONS UI */}
+                            <div className="rounded-2xl border border-[var(--line)] p-4">
+                                <div className="font-extrabold text-[var(--ink)]">Options</div>
+                                <p className="mt-1 text-sm text-[var(--color-muted)]">
+                                    Add option groups like Flavor, Spice Level, Size, Extras, etc.
+                                </p>
+
+                                <div className="mt-4 grid gap-3">
+                                    <Field label="Option Group name (e.g. Flavor)">
+                                        <input
+                                            value={optName}
+                                            onChange={(e) => setOptName(e.target.value)}
+                                            className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                                            placeholder="Flavor"
+                                        />
+                                    </Field>
+
+                                    <div className="grid sm:grid-cols-2 gap-3">
+                                        <Field label="Type (single or multi)">
+                                            <select
+                                                value={optType}
+                                                onChange={(e) => setOptType(e.target.value as "single" | "multi")}
+                                                className="w-full h-11 rounded-xl border border-[var(--line)] px-3 bg-white outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                                            >
+                                                <option value="single">Single (radio)</option>
+                                                <option value="multi">Multi (checkbox)</option>
+                                            </select>
+                                        </Field>
+
+                                        <div className="flex items-end">
+                                            <label className="flex items-center gap-2 text-sm font-semibold text-[var(--ink)]">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={optRequired}
+                                                    onChange={(e) => setOptRequired(e.target.checked)}
+                                                />
+                                                Required
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <Field label="Choices (comma separated)">
+                                        <input
+                                            value={optChoices}
+                                            onChange={(e) => setOptChoices(e.target.value)}
+                                            className="w-full h-11 rounded-xl border border-[var(--line)] px-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                                            placeholder="Vanilla, Chocolate, Red Velvet"
+                                        />
+                                    </Field>
+
+                                    <button
+                                        type="button"
+                                        onClick={addOptionGroup}
+                                        className="h-11 px-6 rounded-full font-semibold bg-white border border-[var(--line)] hover:bg-slate-50"
+                                    >
+                                        Add Option Group
+                                    </button>
+
+                                    {options.length > 0 && (
+                                        <div className="mt-2 space-y-2">
+                                            {options.map((g) => (
+                                                <div
+                                                    key={g.name}
+                                                    className="rounded-xl border border-[var(--line)] p-3 flex items-start justify-between gap-3"
+                                                >
+                                                    <div className="text-sm">
+                                                        <div className="font-bold text-[var(--ink)]">
+                                                            {g.name}{" "}
+                                                            <span className="text-xs text-slate-500">
+                                ({g.type}{g.required ? ", required" : ""})
+                              </span>
+                                                        </div>
+                                                        <div className="mt-1 text-[var(--color-muted)]">
+                                                            {g.choices.join(", ")}
+                                                        </div>
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeOptionGroup(g.name)}
+                                                        className="h-9 px-3 rounded-full border border-[var(--line)] text-sm font-semibold hover:bg-slate-50"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
                             <div className="flex gap-3 flex-wrap">
                                 <button
                                     onClick={save}
                                     disabled={saving}
-                                    className="h-11 px-6 rounded-full bg-[var(--color-accent)] text-white font-semibold hover:opacity-95 disabled:opacity-60"
                                     type="button"
+                                    className="h-11 px-6 rounded-full bg-[var(--color-accent)] text-white font-semibold hover:opacity-95 disabled:opacity-60"
                                 >
                                     {saving ? "Saving..." : editing ? "Update Item" : "Add Item"}
                                 </button>
 
                                 <button
                                     onClick={resetForm}
-                                    className="h-11 px-6 rounded-full border border-[var(--line)] bg-white font-semibold hover:bg-slate-50"
                                     type="button"
+                                    className="h-11 px-6 rounded-full border border-[var(--line)] bg-white font-semibold hover:bg-slate-50"
                                 >
                                     Clear
                                 </button>

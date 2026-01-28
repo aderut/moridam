@@ -10,7 +10,9 @@ export type CartItem = {
     category?: string;
     description?: string;
     qty: number;
+    selectedOptions?: Record<string, string | string[]>;
 };
+
 
 type CartContextType = {
     items: CartItem[];

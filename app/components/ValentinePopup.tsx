@@ -39,13 +39,14 @@ export default function ValentinePopup() {
                     </p>
 
                     <Link
-                        href="/menu"
+                        href="/menu?category=cakes"
                         className="mt-5 inline-flex w-full h-11 items-center justify-center rounded-full font-semibold"
                         style={{ backgroundColor: BEIGE, color: "#000" }}
                         onClick={() => setOpen(false)}
                     >
                         Shop Valentine Special
                     </Link>
+
 
                     <button
                         onClick={() => setOpen(false)}

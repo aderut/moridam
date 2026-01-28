@@ -1,11 +1,10 @@
+
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-export const runtime = "nodejs"; // IMPORTANT for Resend on Vercel
+export const runtime = "nodejs";
 
-export async function GET() {
-    return NextResponse.json({ ok: true, route: "service-booking" });
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
     try {
@@ -19,25 +18,23 @@ export async function POST(req: Request) {
         const eventDate = String(body.eventDate ?? "").trim();
         const guests = Number(body.guests ?? 0);
         const location = String(body.location ?? "").trim();
-        const notes = String(body.notes ?? "").trim();
+        const message = String(body.message ?? "").trim();
 
         if (!service) return NextResponse.json({ error: "Service is required" }, { status: 400 });
         if (!fullName) return NextResponse.json({ error: "Full name is required" }, { status: 400 });
         if (!phone) return NextResponse.json({ error: "Phone is required" }, { status: 400 });
         if (!eventDate) return NextResponse.json({ error: "Event date is required" }, { status: 400 });
-        if (!Number.isFinite(guests) || guests < 1) {
+        if (!Number.isFinite(guests) || guests < 1)
             return NextResponse.json({ error: "Guests must be a valid number" }, { status: 400 });
-        }
 
-        const apiKey = process.env.RESEND_API_KEY;
-        if (!apiKey) return NextResponse.json({ error: "RESEND_API_KEY not set" }, { status: 500 });
+        if (!process.env.RESEND_API_KEY)
+            return NextResponse.json({ error: "RESEND_API_KEY not set" }, { status: 500 });
 
-        const to = process.env.ORDERS_NOTIFY_EMAIL;
-        if (!to) return NextResponse.json({ error: "ORDERS_NOTIFY_EMAIL not set" }, { status: 500 });
+        // ✅ send to your business email
+        const to = process.env.BOOKINGS_NOTIFY_EMAIL || process.env.ORDERS_NOTIFY_EMAIL;
+        if (!to) return NextResponse.json({ error: "BOOKINGS_NOTIFY_EMAIL not set" }, { status: 500 });
 
-        const resend = new Resend(apiKey);
-
-        const text = `New service booking ✅
+        const textToBusiness = `New service booking ✅
 
 Service: ${service}
 Name: ${fullName}
@@ -46,18 +43,45 @@ Email: ${email || "-"}
 Event Date: ${eventDate}
 Guests: ${guests}
 Location: ${location || "-"}
-Notes: ${notes || "-"}
+
+Message:
+${message || "-"}
 `;
 
         await resend.emails.send({
             from: "Moridam Catering <onboarding@resend.dev>",
             to,
-            subject: `New Service Booking — ${service}`,
-            text,
+            subject: `New Booking — ${service}`,
+            text: textToBusiness,
         });
+
+        // ✅ optional: confirmation to customer
+        if (email) {
+            const textToCustomer = `Hi ${fullName},
+
+We received your booking request for: ${service} ✅
+
+Event Date: ${eventDate}
+Guests: ${guests}
+Location: ${location || "-"}
+
+We will contact you shortly to confirm.
+
+— Moridam Catering`;
+
+            await resend.emails.send({
+                from: "Moridam Catering <onboarding@resend.dev>",
+                to: email,
+                subject: `Booking received — ${service}`,
+                text: textToCustomer,
+            });
+        }
 
         return NextResponse.json({ ok: true }, { status: 201 });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Server error" }, { status: 500 });
     }
 }
+
+
+
