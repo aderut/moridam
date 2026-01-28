@@ -12,7 +12,7 @@ export default function AboutSplit() {
                     <div className="relative">
                         <div className="relative h-[360px] rounded-2xl overflow-hidden border border-[var(--line)]">
                             <Image
-                                src="/images/Meatpie.png" // you will replace
+                                src="/images/Puff Puff.png" // you will replace
                                 alt="About"
                                 fill
                                 className="object-cover"
