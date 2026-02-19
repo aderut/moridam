@@ -3,28 +3,20 @@ import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { sendOrderEmail } from "@/app/lib/email";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-type SelectedOptionDetail = {
-  group: string;
-  label: string;
-  price: number;
-};
+type SelectedOptionDetail = { group: string; label: string; price: number };
 
 type CleanItem = {
   id: string | null;
   lineId: string | null;
   title: string;
   qty: number;
-
-  // final unit price (base + addons)
   price: number;
-
   basePrice: number;
   addonsTotal: number;
-
   selectedOptions: Record<string, string[]>;
   selectedOptionDetails: SelectedOptionDetail[];
-
   category: string | null;
   image: string | null;
 };
@@ -36,7 +28,7 @@ export async function POST(req: Request) {
 
     const fullName = String(body.fullName ?? "").trim();
     const phone = String(body.phone ?? "").trim();
-    const method = String(body.method ?? "").trim(); // delivery | pickup
+    const method = String(body.method ?? "").trim();
     const address = String(body.address ?? "").trim();
     const note = String(body.note ?? "").trim();
 
@@ -48,13 +40,7 @@ export async function POST(req: Request) {
     if (!phone) return NextResponse.json({ error: "Phone is required" }, { status: 400 });
     if (!method) return NextResponse.json({ error: "Method is required" }, { status: 400 });
     if (!address) return NextResponse.json({ error: "Address is required" }, { status: 400 });
-    if (items.length === 0) return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
-
-    if (!Number.isFinite(subtotal) || subtotal < 0)
-      return NextResponse.json({ error: "Subtotal is invalid" }, { status: 400 });
-
-    if (!Number.isFinite(total) || total < 0)
-      return NextResponse.json({ error: "Total is invalid" }, { status: 400 });
+    if (!items.length) return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
 
     const cleanItems: CleanItem[] = items.map((i: any) => {
       const selectedOptions =
@@ -73,29 +59,17 @@ export async function POST(req: Request) {
         lineId: String(i?.lineId ?? "").trim() || null,
         title: String(i?.title ?? "").trim(),
         qty: Number(i?.qty ?? 1),
-
         price: Number(i?.price ?? 0),
         basePrice: Number(i?.basePrice ?? 0),
         addonsTotal: Number(i?.addonsTotal ?? 0),
-
         selectedOptions,
         selectedOptionDetails,
-
         category: String(i?.category ?? "").trim() || null,
         image: String(i?.image ?? "").trim() || null,
       };
     });
 
-    for (const it of cleanItems) {
-      if (!it.title) return NextResponse.json({ error: "Item title missing" }, { status: 400 });
-      if (!Number.isFinite(it.qty) || it.qty < 1)
-        return NextResponse.json({ error: "Item qty invalid" }, { status: 400 });
-      if (!Number.isFinite(it.price) || it.price < 0)
-        return NextResponse.json({ error: "Item price invalid" }, { status: 400 });
-    }
-
-    // 1) create order
-    const { data: order, error: orderErr } = await supabaseAdmin
+    const { data: order, error } = await supabaseAdmin
       .from("orders")
       .insert({
         full_name: fullName,
@@ -106,29 +80,12 @@ export async function POST(req: Request) {
         subtotal,
         delivery_fee: 0,
         total,
-        status: "new",
+        items: cleanItems, // keep jsonb too
       })
-      .select("id, order_number, created_at")
+      .select()
       .single();
 
-    if (orderErr) return NextResponse.json({ error: orderErr.message }, { status: 500 });
-
-    // 2) insert order items
-    const rows = cleanItems.map((it) => ({
-      order_id: order.id,
-      title: it.title,
-      qty: it.qty,
-      unit_price: it.price, // final unit price (base + addons)
-      selected_options: it.selectedOptionDetails, // addons array
-      checked: false,
-    }));
-
-    const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(rows);
-
-    if (itemsErr) {
-      await supabaseAdmin.from("orders").delete().eq("id", order.id);
-      return NextResponse.json({ error: itemsErr.message }, { status: 500 });
-    }
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     await sendOrderEmail({
       orderId: order.id,

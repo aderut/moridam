@@ -1,9 +1,9 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-experimental: {
-    turbopackFileSystemCacheForDev: true,
-}
-};
-
-export default nextConfig;
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    images: {
+      remotePatterns: [{ protocol: "https", hostname: "*.supabase.co" }],
+    },
+  };
+  
+  module.exports = nextConfig;
+  

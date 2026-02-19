@@ -25,9 +25,10 @@ export default function Navbar() {
                 {/* Logo + Brand */}
                 <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
                     <Image src="/moridam.png" alt="Moridam Catering" width={38} height={38} priority />
-                    <span className="font-extrabold text-black tracking-wide">
-            Moridam Catering
-          </span>
+                    <span className="font-extrabold text-black tracking-wide whitespace-nowrap">
+                   Moridam Catering
+                 </span>
+
                 </Link>
 
                 {/* Desktop Nav */}

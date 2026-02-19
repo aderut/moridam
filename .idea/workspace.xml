@@ -5,21 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/lib/supabaseClient.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/product/[id]/ProductClient.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/admin/menu/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/admin/menu/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/menu/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/menu/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/service-booking/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/bookings/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/cart/CartProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/cart/CartProvider.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/cart/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/cart/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/checkout/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/checkout/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/components/AboutSplit.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/AboutSplit.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/components/ServiceBookingForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/ServiceBookingForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/components/ValentinePopup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/components/ValentinePopup.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/menu/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/menu/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/product/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/product/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/product/[id]/ui/AddToCartPanel.tsx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,7 +122,17 @@
       <workItem from="1769546387841" duration="4293000" />
       <workItem from="1769560335454" duration="3024000" />
       <workItem from="1769563780449" duration="112000" />
-      <workItem from="1769564443401" duration="364000" />
+      <workItem from="1769564443401" duration="1566000" />
+      <workItem from="1769604539668" duration="1761000" />
+      <workItem from="1769607221471" duration="1962000" />
+      <workItem from="1769628484507" duration="322000" />
+      <workItem from="1769630963077" duration="1407000" />
+      <workItem from="1769632829260" duration="4514000" />
+      <workItem from="1769639938290" duration="1614000" />
+      <workItem from="1769642523757" duration="1863000" />
+      <workItem from="1769644748762" duration="284000" />
+      <workItem from="1769645563579" duration="1584000" />
+      <workItem from="1769647488748" duration="4206000" />
     </task>
     <servers />
   </component>
