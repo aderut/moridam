@@ -55,13 +55,19 @@ const CartContext = createContext<CartContextType | null>(null);
 const STORAGE_KEY = "moridam_cart_v2";
 
 /** stable stringify so the same options produce the same key */
-function stableStringify(obj: any) {
-  if (!obj) return "";
-  if (Array.isArray(obj)) return `[${obj.map(stableStringify).join(",")}]`;
-  if (typeof obj === "object") {
-    const keys = Object.keys(obj).sort();
-    return `{${keys.map((k) => `"${k}":${stableStringify(obj[k])}`).join(",")}}`;
+function stableStringify(obj: unknown): string {
+  if (obj === null || obj === undefined) return "";
+
+  if (Array.isArray(obj)) {
+    return `[${obj.map(stableStringify).join(",")}]`;
   }
+
+  if (typeof obj === "object") {
+    const rec = obj as Record<string, unknown>;
+    const keys = Object.keys(rec).sort();
+    return `{${keys.map((k) => `"${k}":${stableStringify(rec[k])}`).join(",")}}`;
+  }
+
   return JSON.stringify(obj);
 }
 
@@ -81,9 +87,11 @@ function sumAddons(details?: SelectedOptionDetail[]) {
  * - addonsTotal
  * - price = basePrice + addonsTotal
  */
-function normalizeCartItem(input: any): CartItem {
-  const selectedOptionDetails: SelectedOptionDetail[] = Array.isArray(input?.selectedOptionDetails)
-    ? input.selectedOptionDetails
+function normalizeCartItem(input: unknown): CartItem {
+  const raw = (input ?? {}) as any;
+
+  const selectedOptionDetails: SelectedOptionDetail[] = Array.isArray(raw?.selectedOptionDetails)
+    ? raw.selectedOptionDetails
     : [];
 
   const addonsTotalFromDetails = sumAddons(selectedOptionDetails);
@@ -91,28 +99,28 @@ function normalizeCartItem(input: any): CartItem {
   // If basePrice was provided, trust it.
   // Otherwise assume current input.price is base price (this fixes your exact issue).
   const basePrice =
-    Number.isFinite(Number(input?.basePrice)) ? Number(input.basePrice) : Number(input?.price ?? 0);
+    Number.isFinite(Number(raw?.basePrice)) ? Number(raw.basePrice) : Number(raw?.price ?? 0);
 
   // If addonsTotal exists, keep it; else compute from details
   const addonsTotal =
-    Number.isFinite(Number(input?.addonsTotal)) ? Number(input.addonsTotal) : addonsTotalFromDetails;
+    Number.isFinite(Number(raw?.addonsTotal)) ? Number(raw.addonsTotal) : addonsTotalFromDetails;
 
   const finalUnitPrice = basePrice + addonsTotal;
 
-  const id = String(input?.id ?? "").trim();
-  const selectedOptions = input?.selectedOptions;
+  const id = String(raw?.id ?? "").trim();
+  const selectedOptions = raw?.selectedOptions as Record<string, string[]> | undefined;
 
-  const lineId =
-    String(input?.lineId ?? "").trim() || makeLineId(id, selectedOptions);
+  const lineId = String(raw?.lineId ?? "").trim() || makeLineId(id, selectedOptions);
 
   return {
-    ...input,
+    ...raw,
     id,
     lineId,
     basePrice,
     addonsTotal,
     price: finalUnitPrice,
-    qty: Math.max(1, Number(input?.qty ?? 1)),
+    qty: Math.max(1, Number(raw?.qty ?? 1)),
+    selectedOptions,
     selectedOptionDetails,
   };
 }
@@ -126,7 +134,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
 
-      const parsed = JSON.parse(raw) as any[];
+      const parsed = JSON.parse(raw) as unknown[];
       const fixed = (parsed || []).map((i) => normalizeCartItem(i));
       setItems(fixed);
     } catch {}
@@ -151,9 +159,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => {
       const found = prev.find((x) => x.lineId === normalized.lineId);
       if (found) {
-        return prev.map((x) =>
-          x.lineId === normalized.lineId ? { ...x, qty: x.qty + 1 } : x
-        );
+        return prev.map((x) => (x.lineId === normalized.lineId ? { ...x, qty: x.qty + 1 } : x));
       }
       return [...prev, { ...normalized, qty: 1 }];
     });
