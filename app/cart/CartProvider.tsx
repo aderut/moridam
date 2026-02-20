@@ -9,18 +9,9 @@ export type SelectedOptionDetail = {
 };
 
 export type CartItem = {
-  // product id
   id: string;
-
-  // unique line id (product id + selected options)
   lineId: string;
-
   title: string;
-
-  /**
-   * ✅ FINAL unit price (base + addons) per 1 qty
-   * Cart total will be price * qty
-   */
   price: number;
 
   image?: string;
@@ -29,11 +20,9 @@ export type CartItem = {
 
   qty: number;
 
-  // selections
   selectedOptions?: Record<string, string[]>;
   selectedOptionDetails?: SelectedOptionDetail[];
 
-  // breakdown numbers (optional but helpful)
   basePrice?: number;
   addonsTotal?: number;
 };
@@ -42,19 +31,19 @@ type CartContextType = {
   items: CartItem[];
   count: number;
   total: number;
-  add: (item: Omit<CartItem, "qty">) => void;
+
+  // ✅ FIXED: remove lineId from required input
+  add: (item: Omit<CartItem, "qty" | "lineId">) => void;
+
   remove: (lineId: string) => void;
   setQty: (lineId: string, qty: number) => void;
   clear: () => void;
-
-  // (optional alias if you use it elsewhere)
   clearCart: () => void;
 };
 
 const CartContext = createContext<CartContextType | null>(null);
 const STORAGE_KEY = "moridam_cart_v2";
 
-/** stable stringify so the same options produce the same key */
 function stableStringify(obj: unknown): string {
   if (obj === null || obj === undefined) return "";
 
@@ -81,12 +70,6 @@ function sumAddons(details?: SelectedOptionDetail[]) {
   return details.reduce((s, d) => s + Number(d?.price ?? 0), 0);
 }
 
-/**
- * ✅ Ensure cart item ALWAYS has:
- * - basePrice
- * - addonsTotal
- * - price = basePrice + addonsTotal
- */
 function normalizeCartItem(input: unknown): CartItem {
   const raw = (input ?? {}) as any;
 
@@ -96,12 +79,9 @@ function normalizeCartItem(input: unknown): CartItem {
 
   const addonsTotalFromDetails = sumAddons(selectedOptionDetails);
 
-  // If basePrice was provided, trust it.
-  // Otherwise assume current input.price is base price (this fixes your exact issue).
   const basePrice =
     Number.isFinite(Number(raw?.basePrice)) ? Number(raw.basePrice) : Number(raw?.price ?? 0);
 
-  // If addonsTotal exists, keep it; else compute from details
   const addonsTotal =
     Number.isFinite(Number(raw?.addonsTotal)) ? Number(raw.addonsTotal) : addonsTotalFromDetails;
 
@@ -110,7 +90,7 @@ function normalizeCartItem(input: unknown): CartItem {
   const id = String(raw?.id ?? "").trim();
   const selectedOptions = raw?.selectedOptions as Record<string, string[]> | undefined;
 
-  const lineId = String(raw?.lineId ?? "").trim() || makeLineId(id, selectedOptions);
+  const lineId = makeLineId(id, selectedOptions);
 
   return {
     ...raw,
@@ -128,7 +108,6 @@ function normalizeCartItem(input: unknown): CartItem {
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  // load + migrate old items
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -140,7 +119,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
-  // persist
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
@@ -148,18 +126,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items]);
 
   const count = useMemo(() => items.reduce((sum, i) => sum + i.qty, 0), [items]);
-
-  // ✅ totals will now include toppings/addons
   const total = useMemo(() => items.reduce((sum, i) => sum + i.price * i.qty, 0), [items]);
 
-  function add(item: Omit<CartItem, "qty">) {
-    // ✅ normalize ensures addons are included in price
+  // ✅ FIXED SIGNATURE HERE TOO
+  function add(item: Omit<CartItem, "qty" | "lineId">) {
     const normalized = normalizeCartItem(item);
 
     setItems((prev) => {
       const found = prev.find((x) => x.lineId === normalized.lineId);
       if (found) {
-        return prev.map((x) => (x.lineId === normalized.lineId ? { ...x, qty: x.qty + 1 } : x));
+        return prev.map((x) =>
+          x.lineId === normalized.lineId ? { ...x, qty: x.qty + 1 } : x
+        );
       }
       return [...prev, { ...normalized, qty: 1 }];
     });
