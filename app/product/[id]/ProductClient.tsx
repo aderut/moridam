@@ -43,8 +43,8 @@ async function safeJson(res: Response) {
 }
 
 function calculateAddonsTotal(
-  product: Product,
-  selected: Record<string, string[]>
+    product: Product,
+    selected: Record<string, string[]>
 ) {
   let total = 0;
   for (const group of product.options || []) {
@@ -58,8 +58,8 @@ function calculateAddonsTotal(
 }
 
 function buildSelectedOptionDetails(
-  product: Product,
-  selected: Record<string, string[]>
+    product: Product,
+    selected: Record<string, string[]>
 ) {
   const details: { group: string; label: string; price: number }[] = [];
   for (const group of product.options || []) {
@@ -88,16 +88,16 @@ function stableStringify(obj: unknown): string {
     const record = obj as Record<string, unknown>;
     const keys = Object.keys(record).sort();
     return `{${keys
-      .map((k) => `"${k}":${stableStringify(record[k])}`)
-      .join(",")}}`;
+        .map((k) => `"${k}":${stableStringify(record[k])}`)
+        .join(",")}}`;
   }
 
   return JSON.stringify(obj);
 }
 
 function makeLineId(
-  productId: string,
-  selectedOptions?: Record<string, string[]>
+    productId: string,
+    selectedOptions?: Record<string, string[]>
 ) {
   const base = stableStringify(selectedOptions || {});
   return `${productId}__${base}`;
@@ -206,105 +206,105 @@ export default function ProductClient({ id }: { id: string }) {
 
   if (loading) {
     return (
-      <div className="bg-[var(--bg)] min-h-screen pt-24 pb-12">
-        <div className="max-w-[1120px] mx-auto px-5 text-[var(--color-muted)]">
-          Loading…
+        <div className="bg-[var(--bg)] min-h-screen pt-24 pb-12">
+          <div className="max-w-[1120px] mx-auto px-5 text-[var(--color-muted)]">
+            Loading…
+          </div>
         </div>
-      </div>
     );
   }
 
   if (err || !product) {
     return (
-      <div className="bg-[var(--bg)] min-h-screen pt-24 pb-12">
-        <div className="max-w-[1120px] mx-auto px-5">
-          <p className="text-red-600 font-semibold">
-            {err || "Product not found"}
-          </p>
-          <Link href="/menu" className="underline mt-3 inline-block">
-            Back to menu
-          </Link>
+        <div className="bg-[var(--bg)] min-h-screen pt-24 pb-12">
+          <div className="max-w-[1120px] mx-auto px-5">
+            <p className="text-red-600 font-semibold">
+              {err || "Product not found"}
+            </p>
+            <Link href="/menu" className="underline mt-3 inline-block">
+              Back to menu
+            </Link>
+          </div>
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="bg-[var(--bg)] min-h-screen pt-20 pb-12">
-      <div className="max-w-[1120px] mx-auto px-5">
-        <Link
-          href="/menu"
-          className="inline-flex items-center gap-2 font-semibold text-[var(--ink)]"
-        >
-          ← Back
-        </Link>
+      <div className="bg-[var(--bg)] min-h-screen pt-20 pb-12">
+        <div className="max-w-[1120px] mx-auto px-5">
+          <Link
+              href="/menu"
+              className="inline-flex items-center gap-2 font-semibold text-[var(--ink)]"
+          >
+            ← Back
+          </Link>
 
-        <div className="mt-6 bg-white rounded-2xl overflow-hidden">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
-            <div className="bg-slate-100">
-              <div className="h-[520px] lg:h-[560px] w-full">
-                <img
-                  src={imgSrc}
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                  onError={() => setImgSrc("/images/placeholder.png")}
-                />
-              </div>
-            </div>
-
-            <div className="p-7 flex flex-col">
-              <h1 className="text-4xl font-extrabold text-[var(--ink)]">
-                {product.title}
-              </h1>
-              <p className="mt-2 text-[var(--color-muted)]">
-                {product.description || ""}
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-3">
-                <div className="h-11 px-5 rounded-xl flex items-center font-extrabold bg-[#FBF4DE]">
-                  Base: ₦{basePrice.toLocaleString()}
-                </div>
-                <div className="h-11 px-5 rounded-xl flex items-center font-extrabold border">
-                  Add-ons: ₦{addonsTotal.toLocaleString()}
-                </div>
-                <div className="h-11 px-5 rounded-xl flex items-center font-extrabold bg-black text-white">
-                  Total: ₦{totalPrice.toLocaleString()}
+          <div className="mt-6 bg-white rounded-2xl overflow-hidden">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+              <div className="bg-slate-100">
+                <div className="h-[520px] lg:h-[560px] w-full">
+                  <img
+                      src={imgSrc}
+                      alt={product.title}
+                      className="w-full h-full object-cover"
+                      onError={() => setImgSrc("/images/placeholder.png")}
+                  />
                 </div>
               </div>
 
-              <button
-                type="button"
-                className="mt-10 w-full h-12 rounded-xl font-semibold text-white bg-black"
-                onClick={() => {
-                  setOptError(null);
-                  const msg = validateRequired(product);
-                  if (msg) return setOptError(msg);
+              <div className="p-7 flex flex-col">
+                <h1 className="text-4xl font-extrabold text-[var(--ink)]">
+                  {product.title}
+                </h1>
+                <p className="mt-2 text-[var(--color-muted)]">
+                  {product.description || ""}
+                </p>
 
-                  const selectedOptionDetails =
-                    buildSelectedOptionDetails(product, selected);
-                  const lineId = makeLineId(product.id, selected);
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <div className="h-11 px-5 rounded-xl flex items-center font-extrabold bg-[#FBF4DE]">
+                    Base: ₦{basePrice.toLocaleString()}
+                  </div>
+                  <div className="h-11 px-5 rounded-xl flex items-center font-extrabold border">
+                    Add-ons: ₦{addonsTotal.toLocaleString()}
+                  </div>
+                  <div className="h-11 px-5 rounded-xl flex items-center font-extrabold bg-black text-white">
+                    Total: ₦{totalPrice.toLocaleString()}
+                  </div>
+                </div>
 
-                  add({
-                    lineId,
-                    id: product.id,
-                    title: product.title,
-                    category: product.category,
-                    description: product.description ?? "",
-                    image: getImageSrc(product.image),
-                    selectedOptions: selected,
-                    selectedOptionDetails,
-                    basePrice,
-                    addonsTotal,
-                    price: totalPrice,
-                  });
-                }}
-              >
-                Add to cart
-              </button>
+                <button
+                    type="button"
+                    className="mt-10 w-full h-12 rounded-xl font-semibold text-white bg-black"
+                    onClick={() => {
+                      setOptError(null);
+                      const msg = validateRequired(product);
+                      if (msg) return setOptError(msg);
+
+                      const selectedOptionDetails =
+                          buildSelectedOptionDetails(product, selected);
+                      const lineId = makeLineId(product.id, selected);
+
+                      add({
+                        lineId,
+                        id: product.id,
+                        title: product.title,
+                        category: product.category,
+                        description: product.description ?? "",
+                        image: getImageSrc(product.image),
+                        selectedOptions: selected,
+                        selectedOptionDetails,
+                        basePrice,
+                        addonsTotal,
+                        price: totalPrice,
+                      });
+                    }}
+                >
+                  Add to cart
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 }

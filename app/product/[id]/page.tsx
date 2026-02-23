@@ -1,8 +1,8 @@
 import ProductClient from "./ProductClient";
 
 export default async function ProductPage({
-  params,
-}: {
+                                            params,
+                                          }: {
   params: Promise<{ id: string }> | { id: string };
 }) {
   const p = typeof (params as any)?.then === "function" ? await (params as any) : params;
