@@ -5,16 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="09488c56-8ca0-4711-a5fc-4d94a376b5cb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/lib/supabaseClient.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/product/[id]/ProductClient.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/admin/menu/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/admin/menu/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/menu/[id]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/menu/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/menu/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/cart/CartProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/cart/CartProvider.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/supabaseAdmin.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/product/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/product/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/product/[id]/ui/AddToCartPanel.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/product/[id]/ProductClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/product/[id]/ProductClient.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +75,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.29346.143" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.31033.133" />
       </set>
     </attachedChunks>
   </component>
@@ -133,6 +126,8 @@
       <workItem from="1769644748762" duration="284000" />
       <workItem from="1769645563579" duration="1584000" />
       <workItem from="1769647488748" duration="4206000" />
+      <workItem from="1771851988729" duration="20000" />
+      <workItem from="1771852019655" duration="95000" />
     </task>
     <servers />
   </component>

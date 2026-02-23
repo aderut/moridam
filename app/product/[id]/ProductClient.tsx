@@ -42,7 +42,10 @@ async function safeJson(res: Response) {
   }
 }
 
-function calculateAddonsTotal(product: Product, selected: Record<string, string[]>) {
+function calculateAddonsTotal(
+  product: Product,
+  selected: Record<string, string[]>
+) {
   let total = 0;
   for (const group of product.options || []) {
     const picks = selected[group.name] || [];
@@ -54,7 +57,10 @@ function calculateAddonsTotal(product: Product, selected: Record<string, string[
   return total;
 }
 
-function buildSelectedOptionDetails(product: Product, selected: Record<string, string[]>) {
+function buildSelectedOptionDetails(
+  product: Product,
+  selected: Record<string, string[]>
+) {
   const details: { group: string; label: string; price: number }[] = [];
   for (const group of product.options || []) {
     const picks = selected[group.name] || [];
@@ -70,17 +76,29 @@ function buildSelectedOptionDetails(product: Product, selected: Record<string, s
   return details;
 }
 
-// stable stringify for lineId
-function stableStringify(obj: any) {
-  if (!obj) return "";
-  if (Array.isArray(obj)) return `[${obj.map(stableStringify).join(",")}]`;
-  if (typeof obj === "object") {
-    const keys = Object.keys(obj).sort();
-    return `{${keys.map((k) => `"${k}":${stableStringify(obj[k])}`).join(",")}}`;
+/* ✅ PRODUCTION-SAFE STABLE STRINGIFY */
+function stableStringify(obj: unknown): string {
+  if (obj === null || obj === undefined) return "";
+
+  if (Array.isArray(obj)) {
+    return `[${obj.map(stableStringify).join(",")}]`;
   }
+
+  if (typeof obj === "object") {
+    const record = obj as Record<string, unknown>;
+    const keys = Object.keys(record).sort();
+    return `{${keys
+      .map((k) => `"${k}":${stableStringify(record[k])}`)
+      .join(",")}}`;
+  }
+
   return JSON.stringify(obj);
 }
-function makeLineId(productId: string, selectedOptions?: Record<string, string[]>) {
+
+function makeLineId(
+  productId: string,
+  selectedOptions?: Record<string, string[]>
+) {
   const base = stableStringify(selectedOptions || {});
   return `${productId}__${base}`;
 }
@@ -123,7 +141,10 @@ export default function ProductClient({ id }: { id: string }) {
         if (!alive) return;
 
         const p = data as Product;
-        const fixed: Product = { ...p, options: Array.isArray(p.options) ? p.options : null };
+        const fixed: Product = {
+          ...p,
+          options: Array.isArray(p.options) ? p.options : null,
+        };
 
         setProduct(fixed);
         setImgSrc(getImageSrc(fixed.image));
@@ -186,7 +207,9 @@ export default function ProductClient({ id }: { id: string }) {
   if (loading) {
     return (
       <div className="bg-[var(--bg)] min-h-screen pt-24 pb-12">
-        <div className="max-w-[1120px] mx-auto px-5 text-[var(--color-muted)]">Loading…</div>
+        <div className="max-w-[1120px] mx-auto px-5 text-[var(--color-muted)]">
+          Loading…
+        </div>
       </div>
     );
   }
@@ -195,7 +218,9 @@ export default function ProductClient({ id }: { id: string }) {
     return (
       <div className="bg-[var(--bg)] min-h-screen pt-24 pb-12">
         <div className="max-w-[1120px] mx-auto px-5">
-          <p className="text-red-600 font-semibold">{err || "Product not found"}</p>
+          <p className="text-red-600 font-semibold">
+            {err || "Product not found"}
+          </p>
           <Link href="/menu" className="underline mt-3 inline-block">
             Back to menu
           </Link>
@@ -207,14 +232,15 @@ export default function ProductClient({ id }: { id: string }) {
   return (
     <div className="bg-[var(--bg)] min-h-screen pt-20 pb-12">
       <div className="max-w-[1120px] mx-auto px-5">
-        <Link href="/menu" className="inline-flex items-center gap-2 font-semibold text-[var(--ink)]">
+        <Link
+          href="/menu"
+          className="inline-flex items-center gap-2 font-semibold text-[var(--ink)]"
+        >
           ← Back
         </Link>
 
-        {/* ✅ border removed */}
-        <div className="mt-6 bg-white rounded-2xl p-0 overflow-hidden">
+        <div className="mt-6 bg-white rounded-2xl overflow-hidden">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
-            {/* IMAGE */}
             <div className="bg-slate-100">
               <div className="h-[520px] lg:h-[560px] w-full">
                 <img
@@ -226,89 +252,26 @@ export default function ProductClient({ id }: { id: string }) {
               </div>
             </div>
 
-            {/* RIGHT */}
             <div className="p-7 flex flex-col">
-              <h1 className="text-4xl font-extrabold text-[var(--ink)]">{product.title}</h1>
-              <p className="mt-2 text-[var(--color-muted)]">{product.description || ""}</p>
+              <h1 className="text-4xl font-extrabold text-[var(--ink)]">
+                {product.title}
+              </h1>
+              <p className="mt-2 text-[var(--color-muted)]">
+                {product.description || ""}
+              </p>
 
-              {/* price pills */}
-              <div className="mt-5 flex items-center gap-3 flex-wrap">
-                <div className="h-11 px-5 rounded-xl inline-flex items-center font-extrabold bg-[#FBF4DE] text-[#2B2B2B]">
+              <div className="mt-5 flex flex-wrap gap-3">
+                <div className="h-11 px-5 rounded-xl flex items-center font-extrabold bg-[#FBF4DE]">
                   Base: ₦{basePrice.toLocaleString()}
                 </div>
-                <div className="h-11 px-5 rounded-xl inline-flex items-center font-extrabold border border-[var(--line)]">
+                <div className="h-11 px-5 rounded-xl flex items-center font-extrabold border">
                   Add-ons: ₦{addonsTotal.toLocaleString()}
                 </div>
-                <div className="h-11 px-5 rounded-xl inline-flex items-center font-extrabold bg-black text-white">
+                <div className="h-11 px-5 rounded-xl flex items-center font-extrabold bg-black text-white">
                   Total: ₦{totalPrice.toLocaleString()}
                 </div>
               </div>
 
-              {/* OPTIONS */}
-              {hasOptions && (
-                <div className="mt-8">
-                  <div className="text-lg font-extrabold text-[var(--ink)]">Options</div>
-
-                  {optError && (
-                    <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                      {optError}
-                    </div>
-                  )}
-
-                  <div className="mt-5 space-y-6">
-                    {(product.options || []).map((group, gIdx) => (
-                      <div key={`${group.name}-${gIdx}`}>
-                        <div className="flex items-center gap-2">
-                          <div className="font-bold text-[var(--ink)]">{group.name}</div>
-                          {group.required ? (
-                            <span className="text-xs font-semibold text-red-600">Required</span>
-                          ) : (
-                            <span className="text-xs text-[var(--color-muted)]">Optional</span>
-                          )}
-                        </div>
-
-                        <div className="mt-3 grid sm:grid-cols-2 gap-3">
-                          {(group.choices || []).map((choice, i) => {
-                            const checked = (selected[group.name] || []).includes(choice.label);
-                            const key = `${group.name}-${choice.label}-${i}`;
-                            const inputType = group.type === "single" ? "radio" : "checkbox";
-
-                            return (
-                              <label
-                                key={key}
-                                className="flex items-center justify-between gap-3 rounded-xl border border-[var(--line)] bg-white px-4 py-3 cursor-pointer hover:bg-slate-50"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <input
-                                    type={inputType}
-                                    name={group.name}
-                                    checked={checked}
-                                    onChange={() => toggleChoice(group, choice.label)}
-                                    className="h-4 w-4"
-                                  />
-                                  <span className="text-sm font-semibold text-[var(--ink)]">
-                                    {choice.label}
-                                  </span>
-                                </div>
-
-                                <span className="text-xs font-semibold text-slate-600">
-                                  +₦{Number(choice.price || 0).toLocaleString()}
-                                </span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {!hasOptions && (
-                <div className="mt-8 text-sm text-[var(--color-muted)]">No options for this item.</div>
-              )}
-
-              {/* ✅ ADD TO CART moved down (mt increased) */}
               <button
                 type="button"
                 className="mt-10 w-full h-12 rounded-xl font-semibold text-white bg-black"
@@ -317,7 +280,8 @@ export default function ProductClient({ id }: { id: string }) {
                   const msg = validateRequired(product);
                   if (msg) return setOptError(msg);
 
-                  const selectedOptionDetails = buildSelectedOptionDetails(product, selected);
+                  const selectedOptionDetails =
+                    buildSelectedOptionDetails(product, selected);
                   const lineId = makeLineId(product.id, selected);
 
                   add({
