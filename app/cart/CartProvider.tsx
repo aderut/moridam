@@ -31,6 +31,7 @@ type CartContextType = {
   decrease: (lineId: string) => void;
   clear: () => void;
   total: number;
+  count: number; // ✅ added count
 };
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -38,7 +39,7 @@ const CartContext = createContext<CartContextType | null>(null);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  /* ✅ LOAD FROM LOCALSTORAGE */
+  // Load from localStorage
   useEffect(() => {
     const stored = localStorage.getItem("cart");
     if (stored) {
@@ -46,12 +47,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  /* ✅ SAVE TO LOCALSTORAGE */
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(items));
   }, [items]);
 
-  /* ✅ ADD TO CART */
+  // Add to cart
   function add(item: Omit<CartItem, "qty">) {
     setItems((prev) => {
       const existing = prev.find((i) => i.lineId === item.lineId);
@@ -92,13 +93,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems([]);
   }
 
-  const total = items.reduce((sum, item) => {
-    return sum + item.price * item.qty;
-  }, 0);
+  const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+  // ✅ Count is total number of items
+  const count = items.reduce((sum, item) => sum + item.qty, 0);
 
   return (
       <CartContext.Provider
-          value={{ items, add, remove, increase, decrease, clear, total }}
+          value={{ items, add, remove, increase, decrease, clear, total, count }}
       >
         {children}
       </CartContext.Provider>
