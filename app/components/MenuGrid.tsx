@@ -75,11 +75,21 @@ export default function MenuGrid() {
                             <button
                                 onClick={() =>
                                     add({
+                                        lineId: crypto.randomUUID(),
                                         id: p.id,
-                                        title: p.name, // ✅ mapped correctly
-                                        price: p.price,
+                                        title: p.name,
+                                        category: p.category,
+                                        description: p.desc,
                                         image: p.image,
+
+                                        selectedOptions: {},
+                                        selectedOptionDetails: [],
+
+                                        basePrice: p.price,
+                                        addonsTotal: 0,
+                                        price: p.price,
                                     })
+
                                 }
                                 className="mt-4 w-full h-10 rounded-lg bg-teal-700 text-white font-semibold hover:opacity-95"
                             >
