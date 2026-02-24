@@ -11,7 +11,7 @@ function formatNaira(n: number) {
 }
 
 export default function CartPage() {
-  const { items, total, remove, setQty, clear } = useCart();
+    const { items, total, remove, clear } = useCart();
 
   return (
     <div className="bg-[var(--bg)] min-h-screen pt-16 pb-12">
@@ -77,25 +77,7 @@ export default function CartPage() {
 
                     {/* Controls */}
                     <div className="sm:ml-auto flex items-center justify-between sm:justify-end gap-3">
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          className="h-9 w-9 rounded-full border border-[var(--line)] font-bold"
-                          onClick={() => setQty(i.lineId, i.qty - 1)}
-                          aria-label="Decrease quantity"
-                        >
-                          −
-                        </button>
-                        <div className="w-8 text-center font-bold">{i.qty}</div>
-                        <button
-                          type="button"
-                          className="h-9 w-9 rounded-full border border-[var(--line)] font-bold"
-                          onClick={() => setQty(i.lineId, i.qty + 1)}
-                          aria-label="Increase quantity"
-                        >
-                          +
-                        </button>
-                      </div>
+
 
                       <button
                         type="button"
