@@ -29,9 +29,10 @@ type CartContextType = {
   remove: (lineId: string) => void;
   increase: (lineId: string) => void;
   decrease: (lineId: string) => void;
+  setQty: (lineId: string, qty: number) => void; // ✅ added
   clear: () => void;
   total: number;
-  count: number; // ✅ added count
+  count: number; // ✅ total item count
 };
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -39,30 +40,19 @@ const CartContext = createContext<CartContextType | null>(null);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  // Load from localStorage
   useEffect(() => {
     const stored = localStorage.getItem("cart");
-    if (stored) {
-      setItems(JSON.parse(stored));
-    }
+    if (stored) setItems(JSON.parse(stored));
   }, []);
 
-  // Save to localStorage
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(items));
   }, [items]);
 
-  // Add to cart
   function add(item: Omit<CartItem, "qty">) {
     setItems((prev) => {
       const existing = prev.find((i) => i.lineId === item.lineId);
-
-      if (existing) {
-        return prev.map((i) =>
-            i.lineId === item.lineId ? { ...i, qty: i.qty + 1 } : i
-        );
-      }
-
+      if (existing) return prev.map((i) => (i.lineId === item.lineId ? { ...i, qty: i.qty + 1 } : i));
       return [...prev, { ...item, qty: 1 }];
     });
   }
@@ -72,19 +62,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   function increase(lineId: string) {
-    setItems((prev) =>
-        prev.map((i) =>
-            i.lineId === lineId ? { ...i, qty: i.qty + 1 } : i
-        )
-    );
+    setItems((prev) => prev.map((i) => (i.lineId === lineId ? { ...i, qty: i.qty + 1 } : i)));
   }
 
   function decrease(lineId: string) {
     setItems((prev) =>
         prev
-            .map((i) =>
-                i.lineId === lineId ? { ...i, qty: i.qty - 1 } : i
-            )
+            .map((i) => (i.lineId === lineId ? { ...i, qty: i.qty - 1 } : i))
+            .filter((i) => i.qty > 0)
+    );
+  }
+
+  // ✅ New function to directly set quantity
+  function setQty(lineId: string, qty: number) {
+    setItems((prev) =>
+        prev
+            .map((i) => (i.lineId === lineId ? { ...i, qty: Math.max(qty, 0) } : i))
             .filter((i) => i.qty > 0)
     );
   }
@@ -94,14 +87,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-
-  // ✅ Count is total number of items
   const count = items.reduce((sum, item) => sum + item.qty, 0);
 
   return (
-      <CartContext.Provider
-          value={{ items, add, remove, increase, decrease, clear, total, count }}
-      >
+      <CartContext.Provider value={{ items, add, remove, increase, decrease, setQty, clear, total, count }}>
         {children}
       </CartContext.Provider>
   );
@@ -109,8 +98,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
 export function useCart() {
   const ctx = useContext(CartContext);
-  if (!ctx) {
-    throw new Error("useCart must be used inside CartProvider");
-  }
+  if (!ctx) throw new Error("useCart must be used inside CartProvider");
   return ctx;
 }
